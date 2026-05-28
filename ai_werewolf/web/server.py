@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import mimetypes
 import threading
 from dataclasses import asdict
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -15,7 +16,9 @@ from ai_werewolf.eval.html_report import save_html_replay
 from ai_werewolf.eval.review import build_review, save_review
 from ai_werewolf.logging.event_store import EventStore
 from ai_werewolf.models.schema import Action, AgentObservation, GameConfig
-from ai_werewolf.rules.roles import role_name_cn, faction_name_cn
+from ai_werewolf.rules.roles import faction_name_cn, role_name_cn
+
+STATIC_DIR = Path(__file__).with_name("static")
 
 
 class BrowserHumanAgent(BaseAgent):
@@ -28,7 +31,13 @@ class BrowserHumanAgent(BaseAgent):
 
 
 class WebGameSession:
-    def __init__(self, config: GameConfig, out_dir: str | Path, enable_leak_check: bool = True, agent_factory: Callable[[str, int | None], BaseAgent] | None = None) -> None:
+    def __init__(
+        self,
+        config: GameConfig,
+        out_dir: str | Path,
+        enable_leak_check: bool = True,
+        agent_factory: Callable[[str, int | None], BaseAgent] | None = None,
+    ) -> None:
         self.config = config
         self.out_dir = Path(out_dir)
         self.out_dir.mkdir(parents=True, exist_ok=True)
@@ -44,6 +53,8 @@ class WebGameSession:
         self.started = False
         self.enable_leak_check = enable_leak_check
         self.agent_factory = agent_factory
+        self.agent_mode = "rule"
+        self.llm_agent_config_path: str | None = None
         self._condition = threading.Condition()
         self._pending: dict[str, AgentObservation] = {}
         self._submitted: dict[str, Action] = {}
@@ -64,7 +75,12 @@ class WebGameSession:
                 return RuleBasedAgent(pid, seed=seed)
 
             factory = self.agent_factory or default_factory
-            self.engine = GameEngine(config=self.config, event_store=self.store, agent_factory=factory, enable_leak_check=self.enable_leak_check)
+            self.engine = GameEngine(
+                config=self.config,
+                event_store=self.store,
+                agent_factory=factory,
+                enable_leak_check=self.enable_leak_check,
+            )
             self.state = self.engine.run()
             self.review = build_review(self.state, self.store)
             save_review(self.review, self.review_path)
@@ -115,10 +131,18 @@ class WebGameSession:
         players_public = []
         players_god = []
         if state:
-            for p in sorted(state.players.values(), key=lambda x: x.seat):
-                base = p.public_view()
+            for player in sorted(state.players.values(), key=lambda x: x.seat):
+                base = player.public_view()
                 players_public.append(base)
-                players_god.append({**base, "role": p.role, "role_cn": role_name_cn(p.role), "faction": p.faction, "faction_cn": faction_name_cn(p.faction)})
+                players_god.append(
+                    {
+                        **base,
+                        "role": player.role,
+                        "role_cn": role_name_cn(player.role),
+                        "faction": player.faction,
+                        "faction_cn": faction_name_cn(player.faction),
+                    }
+                )
         return {
             "started": self.started,
             "done": self.done,
@@ -131,17 +155,33 @@ class WebGameSession:
             "winner": state.winner if state else None,
             "win_reason": state.win_reason if state else None,
             "human_players": self.config.human_players,
+            "agent_mode": self.agent_mode,
+            "version_label": self.config.version_label,
             "players": players_god if god else players_public,
             "public_events": [e.to_dict() for e in self.store.public_events()],
-            "log_path": str(self.log_path),
-            "review_path": str(self.review_path),
-            "html_path": str(self.html_path),
+            "pending_players": sorted(self._pending.keys()),
+            "artifacts": {
+                "log_path": str(self.log_path),
+                "review_path": str(self.review_path),
+                "html_path": str(self.html_path),
+            },
+            "llm_agent_configs": self._llm_agent_config_summaries(),
         }
+
+    def review_state(self) -> dict[str, Any] | None:
+        return self.review
 
     def pending_observation(self, player_id: str) -> dict[str, Any] | None:
         with self._condition:
             obs = self._pending.get(player_id.upper())
-            return asdict(obs) if obs else None
+        return asdict(obs) if obs else None
+
+    def _llm_agent_config_summaries(self) -> dict[str, Any]:
+        factory = self.agent_factory
+        if factory is None:
+            return {}
+        value = getattr(factory, "llm_provider_summaries", {})
+        return dict(value) if isinstance(value, dict) else {}
 
 
 def run_web_server(session: WebGameSession, host: str = "127.0.0.1", port: int = 8765) -> None:
@@ -151,12 +191,18 @@ def run_web_server(session: WebGameSession, host: str = "127.0.0.1", port: int =
         def do_GET(self) -> None:  # noqa: N802
             parsed = urlparse(self.path)
             if parsed.path == "/":
-                self._send_html(INDEX_HTML)
+                self._send_static(STATIC_DIR / "index.html")
+                return
+            if parsed.path.startswith("/static/"):
+                self._send_static(STATIC_DIR / parsed.path.removeprefix("/static/"))
                 return
             if parsed.path == "/api/state":
                 qs = parse_qs(parsed.query)
                 god = qs.get("god", ["0"])[0] in {"1", "true", "yes"}
                 self._send_json(session.public_state(god=god))
+                return
+            if parsed.path == "/api/review":
+                self._send_json({"review": session.review_state()})
                 return
             if parsed.path == "/api/pending":
                 qs = parse_qs(parsed.query)
@@ -185,21 +231,38 @@ def run_web_server(session: WebGameSession, host: str = "127.0.0.1", port: int =
             body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
             self.send_response(status)
             self.send_header("content-type", "application/json; charset=utf-8")
+            self.send_header("cache-control", "no-store")
             self.send_header("content-length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
 
-        def _send_html(self, html: str) -> None:
-            body = html.encode("utf-8")
+        def _send_static(self, path: Path) -> None:
+            safe_root = STATIC_DIR.resolve()
+            try:
+                resolved = path.resolve()
+                if safe_root not in resolved.parents and resolved != safe_root:
+                    raise ValueError("invalid static path")
+                if not resolved.exists() or not resolved.is_file():
+                    self.send_error(404)
+                    return
+                body = resolved.read_bytes()
+            except Exception:
+                self.send_error(404)
+                return
+            content_type = mimetypes.guess_type(str(resolved))[0] or "application/octet-stream"
+            if resolved.suffix == ".js":
+                content_type = "text/javascript; charset=utf-8"
+            elif resolved.suffix in {".html", ".css"}:
+                content_type += "; charset=utf-8"
             self.send_response(200)
-            self.send_header("content-type", "text/html; charset=utf-8")
+            self.send_header("content-type", content_type)
             self.send_header("content-length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
 
     server = ThreadingHTTPServer((host, port), Handler)
-    print(f"AI 狼人杀 Web 观战/人机混战服务已启动：http://{host}:{port}")
-    print(f"人类玩家：{', '.join(session.config.human_players) if session.config.human_players else '无，纯 AI 对战'}")
+    print(f"AI 狼人杀 Web 服务已启动：http://{host}:{port}")
+    print(f"运行模式：{session.agent_mode}；人类玩家：{', '.join(session.config.human_players) if session.config.human_players else '无，纯 AI 对战'}")
     print("按 Ctrl+C 退出服务。")
     try:
         server.serve_forever()
@@ -207,50 +270,3 @@ def run_web_server(session: WebGameSession, host: str = "127.0.0.1", port: int =
         print("\n服务已停止。")
     finally:
         server.server_close()
-
-
-INDEX_HTML = r'''<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>AI 狼人杀观战 UI</title>
-<style>
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f6f7fb;color:#1f2937}.wrap{max-width:1200px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}.card{background:white;border-radius:16px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.08);margin:12px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.player{border-left:5px solid #d1d5db}.dead{opacity:.6}.wolf{border-left-color:#ef4444}.good{border-left-color:#10b981}.badge{display:inline-block;background:#eef2ff;border-radius:999px;padding:3px 9px;margin:2px;font-size:12px}.events{max-height:520px;overflow:auto}.event{border-bottom:1px solid #eee;padding:10px 0}.phase{font-weight:700}.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}button{border:0;background:#2563eb;color:white;border-radius:10px;padding:9px 14px;cursor:pointer}button:disabled{background:#9ca3af}select,input,textarea{border:1px solid #d1d5db;border-radius:10px;padding:8px;width:100%;box-sizing:border-box}textarea{min-height:80px}.cols{display:grid;grid-template-columns:2fr 1fr;gap:16px}@media(max-width:850px){.cols{grid-template-columns:1fr}}
-</style>
-</head>
-<body><div class="wrap">
-<div class="top"><div><h1>AI 狼人杀观战 UI</h1><div id="status"></div></div><div class="controls"><label><input type="checkbox" id="god"> 上帝视角</label><select id="human"></select></div></div>
-<div class="grid" id="players"></div>
-<div class="cols"><div class="card"><h2>公开事件时间线</h2><div class="events" id="events"></div></div><div class="card"><h2>人类行动面板</h2><div id="pending">请选择人类玩家席位，等待该玩家行动。</div></div></div>
-</div>
-<script>
-const $=id=>document.getElementById(id); let lastPendingKey="";
-function esc(x){return String(x??"").replace(/[&<>]/g,s=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[s]));}
-async function poll(){
-  const god=$('god').checked?'1':'0';
-  const st=await fetch('/api/state?god='+god).then(r=>r.json());
-  $('status').innerHTML=`<span class="badge">Game ${esc(st.game_id)}</span><span class="badge">阶段 ${esc(st.phase)}</span><span class="badge">轮次 ${st.round_index}</span><span class="badge">胜者 ${esc(st.winner||'未结束')}</span>`+(st.error?`<span class="badge">错误 ${esc(st.error)}</span>`:'');
-  const currentHuman=$('human').value; $('human').innerHTML='<option value="">选择人类玩家</option>'+st.human_players.map(p=>`<option ${p===currentHuman?'selected':''}>${p}</option>`).join('');
-  $('players').innerHTML=st.players.map(p=>`<div class="card player ${p.alive?'':'dead'} ${p.faction==='wolves'?'wolf':(p.faction?'good':'')}"><b>${esc(p.player_id)} · ${esc(p.name)}</b><br>状态：${p.alive?'存活':'死亡 '+esc(p.death_reason)}<br>${p.role_cn?`身份：${esc(p.role_cn)}<br>阵营：${esc(p.faction_cn)}`:''}${p.is_human?'<br><span class="badge">Human</span>':''}</div>`).join('');
-  $('events').innerHTML=st.public_events.slice().reverse().map(e=>`<div class="event"><div><span class="badge">R${e.round_index}</span><span class="badge">${esc(e.phase)}</span><b>${esc(e.event_type)}</b> ${esc(e.actor_id||'系统')}</div><pre>${esc(JSON.stringify(e.payload,null,2))}</pre></div>`).join('');
-  const hp=$('human').value; if(hp){ await pollPending(hp); }
-}
-async function pollPending(pid){
-  const data=await fetch('/api/pending?player_id='+encodeURIComponent(pid)).then(r=>r.json());
-  const obs=data.pending; if(!obs){$('pending').innerHTML='当前没有等待 '+esc(pid)+' 的行动。'; lastPendingKey=''; return;}
-  const key=obs.player_id+'|'+obs.phase+'|'+obs.round_index+'|'+obs.day_index+'|'+obs.night_index;
-  if(key===lastPendingKey) return; lastPendingKey=key;
-  let options=[]; obs.available_actions.forEach(spec=>{ const targets=spec.target_options||[]; if(!targets.length) options.push({a:spec.action_type,t:''}); else targets.forEach(t=>options.push({a:spec.action_type,t:t.player_id})); });
-  const actionTypes=[...new Set(options.map(o=>o.a))];
-  $('pending').innerHTML=`<p><b>${esc(obs.player_id)}</b>：${esc(obs.current_task)}</p><label>动作</label><select id="act">${actionTypes.map(a=>`<option>${esc(a)}</option>`).join('')}</select><label>目标</label><select id="target"></select><label>发言内容</label><textarea id="content"></textarea><button onclick="submitAction('${esc(obs.player_id)}')">提交行动</button>`;
-  const refreshTargets=()=>{ const a=$('act').value; const ts=options.filter(o=>o.a===a&&o.t).map(o=>o.t); $('target').innerHTML='<option value="">无</option>'+ts.map(t=>`<option>${esc(t)}</option>`).join(''); };
-  $('act').onchange=refreshTargets; refreshTargets();
-}
-async function submitAction(pid){
-  const body={player_id:pid,action_type:$('act').value,target_player_id:$('target').value||null,content:$('content').value||null};
-  const res=await fetch('/api/action',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json());
-  if(!res.ok) alert(res.error); else { $('pending').innerHTML='已提交，等待下一步。'; lastPendingKey=''; poll(); }
-}
-$('god').onchange=poll; $('human').onchange=()=>{lastPendingKey=''; poll();}; setInterval(poll,1000); poll();
-</script></body></html>'''

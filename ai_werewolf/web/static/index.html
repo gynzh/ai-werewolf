@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Werewolf Observatory</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">狼</div>
+        <div>
+          <h1>AI Werewolf</h1>
+          <p>Multi-Agent Observatory</p>
+        </div>
+      </div>
+
+      <section class="panel compact">
+        <div class="panel-title">对局状态</div>
+        <div id="statusChips" class="chip-stack"></div>
+      </section>
+
+      <section class="panel compact">
+        <div class="panel-title">观战控制</div>
+        <label class="switch-row">
+          <input type="checkbox" id="godToggle" />
+          <span>上帝视角</span>
+        </label>
+        <label class="field-label" for="humanSelect">人类席位</label>
+        <select id="humanSelect"></select>
+        <button id="refreshButton" class="button ghost">立即刷新</button>
+      </section>
+
+      <section class="panel compact">
+        <div class="panel-title">输出文件</div>
+        <div id="artifacts" class="artifact-list"></div>
+      </section>
+    </aside>
+
+    <main class="main">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">实时观战 / 人机混战</p>
+          <h2 id="heroTitle">等待对局启动</h2>
+          <p id="heroSubtitle">正在连接本地后端...</p>
+        </div>
+        <div id="winnerCard" class="winner-card hidden"></div>
+      </header>
+
+      <section class="dashboard-grid">
+        <article class="panel players-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Seats</p>
+              <h3>玩家席位</h3>
+            </div>
+            <div id="aliveSummary" class="muted"></div>
+          </div>
+          <div id="players" class="players-grid"></div>
+        </article>
+
+        <article class="panel action-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Human Action</p>
+              <h3>人类行动面板</h3>
+            </div>
+            <div id="pendingBadge" class="pill">等待</div>
+          </div>
+          <div id="pending" class="pending-box">请选择人类玩家席位，等待该玩家行动。</div>
+        </article>
+      </section>
+
+      <section class="panel timeline-panel">
+        <div class="panel-head timeline-head">
+          <div>
+            <p class="eyebrow">Public Timeline</p>
+            <h3>公开事件时间线</h3>
+          </div>
+          <div class="timeline-tools">
+            <input id="eventSearch" type="search" placeholder="搜索玩家、事件、发言..." />
+            <select id="eventFilter">
+              <option value="all">全部事件</option>
+              <option value="speech">只看发言</option>
+              <option value="vote">只看投票</option>
+              <option value="system">只看系统</option>
+            </select>
+          </div>
+        </div>
+        <div id="events" class="timeline"></div>
+      </section>
+
+      <section class="panel llm-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">LLM Runtime</p>
+            <h3>Agent 配置概览</h3>
+          </div>
+        </div>
+        <div id="llmConfigs" class="config-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

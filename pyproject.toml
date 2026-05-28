@@ -1,16 +1,20 @@
 [project]
 name = "ai-werewolf-mvp"
-version = "2.1.0"
-description = "Runnable v2.1 multi-agent AI Werewolf system with engine, evaluation, leaderboard, replay, and local web UI"
+version = "2.2.0"
+description = "Runnable multi-agent AI Werewolf system with independent LLM agents, evaluation, replay, and separated web UI"
 requires-python = ">=3.10"
 authors = [{ name = "AI Werewolf Agent Team" }]
 readme = "README.md"
 dependencies = [
-    "python-dotenv>=1.2.2",
+  "pytest>=9.0.3",
+  "python-dotenv>=1.2.2",
 ]
 
 [project.scripts]
 ai-werewolf = "ai_werewolf.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ai_werewolf*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

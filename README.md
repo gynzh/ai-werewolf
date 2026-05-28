@@ -1,226 +1,43 @@
-# AI 狼人杀 — 多智能体协作与博弈 Agent Team 系统 v2.1
+# AI 狼人杀 — 多智能体协作与博弈系统
 
-这是一个可直接运行的 AI 狼人杀多 Agent 项目。当前 v2.1 已实现完整对局引擎、多角色 Agent、严格信息隔离、结构化日志、自动复盘、批量评测 Leaderboard、HTML 回放、本地浏览器观战 / 人机混战 UI，并新增**真实 LLM API 接口**。
+这是一个可直接运行的 AI 狼人杀多 Agent 项目，支持规则 Agent、真实 LLM Agent、批量评测、结构化日志、自动复盘、HTML 回放，以及前后端分离的本地 Web 观战 / 人机混战界面。
 
-项目支持两种 AI 运行模式：
+## 核心能力
 
-- `rule`：本地规则 Agent，无需网络和 API Key，适合验收、测试、批量跑分。
-- `llm`：真实 LLM Agent，通过 OpenAI-compatible `/v1/chat/completions` API 调用模型，适合展示多 Agent 大模型博弈能力。
+- 多 Agent 自主对局：狼人、预言家、女巫、猎人、守卫、平民。
+- 信息隔离：Agent 只能读取自己的 `AgentObservation`。
+- 真实 LLM 接入：OpenAI-compatible `/v1/chat/completions`。
+- 每个 LLM Agent 可独立配置 API Key、Base URL、模型、温度、JSON mode 等。
+- Web UI 前后端分离：Python 后端只提供 API 和静态文件服务，前端位于 `ai_werewolf/web/static/`。
+- 安全公开事件：公开事件会自动移除 `reasoning_summary` 等私密推理字段，避免身份泄漏污染对局。
+- 评测与复盘：JSONL 事件日志、review JSON、单局 HTML replay、Leaderboard。
 
-进阶方向选择并实现：**② 评测+复盘**。
+## 安装
 
----
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -e .
+```
 
-## 1. 已实现功能总览
-
-### 核心功能
-
-- 多 Agent 自主对局。
-- 每个 Agent 按身份拥有独立目标、策略和动作空间。
-- 狼人阵营夜间私密协商与击杀投票。
-- 角色支持：狼人、预言家、女巫、猎人、守卫、平民。
-- 完整回合流转：夜晚行动、白天发言、投票放逐、猎人开枪、胜负裁决。
-- 严格信息隔离：Agent 只能接收 `AgentObservation`，不能访问完整 `GameState`。
-- 结构化 JSONL 事件日志，全程可观测。
-- 自动复盘 JSON。
-- 单局 HTML 回放。
-- 批量 Leaderboard：JSON / Markdown / HTML。
-- 本地浏览器观战 UI，支持纯 AI 对战或人机混战。
-- OpenAI-compatible LLM API Provider。
-- LLM 调用失败或输出非法时可自动回退到规则 Agent。
-
-### 评测+复盘
-
-- 结果评测：阵营胜率、角色存活率、角色胜率、平均轮数。
-- 过程评测：投票准确率、狼刀命中、预言家查验、女巫用药、守卫守护、猎人开枪、fallback 率。
-- LLM 评测：LLM 行动次数、LLM 错误次数、LLM 规则回退次数、平均延迟。
-- 自动复盘：关键转折、死亡记录、玩家行为摘要。
-- Leaderboard：支持不同版本 / 不同模型 Agent 的同台比较。
-
----
-
-## 2. 环境要求
-
-- Python 3.10+
-- 默认规则 Agent 无强制第三方依赖
-- LLM 模式需要可访问 OpenAI-compatible Chat Completions API
-
-在项目根目录运行：
+查看可用板子：
 
 ```bash
 python -m ai_werewolf boards
 ```
 
----
+## 快速运行
 
-## 3. 可用板子
-
-```bash
-python -m ai_werewolf boards
-```
-
-| 预设 | 角色配置 |
-|---|---|
-| `6p` | 2 狼人 + 1 预言家 + 1 女巫 + 2 平民 |
-| `8p-simple` | 3 狼人 + 1 预言家 + 1 女巫 + 3 平民 |
-| `10p-standard` | 3 狼人 + 1 预言家 + 1 女巫 + 1 猎人 + 1 守卫 + 3 平民 |
-
----
-
-## 4. 运行规则 Agent 纯 AI 对战
-
-运行一局 6 人局：
+规则 Agent 离线跑一局：
 
 ```bash
 python -m ai_werewolf run --games 1 --seed 42 --preset 6p --out logs/demo
 ```
 
-运行一局 10 人标准局：
-
-```bash
-python -m ai_werewolf run --games 1 --seed 42 --preset 10p-standard --out logs/demo_10p
-```
-
-批量运行并生成 Leaderboard：
-
-```bash
-python -m ai_werewolf run --games 20 --seed 100 --preset 10p-standard --out logs/batch_10p
-```
-
-输出文件：
-
-```text
-logs/batch_10p/
-├── game_001_seed_100.jsonl
-├── game_001_seed_100_review.json
-├── game_001_seed_100_replay.html
-├── ...
-├── batch_summary.json
-├── leaderboard.json
-├── leaderboard.md
-└── leaderboard.html
-```
-
----
-
-## 5. 运行真实 LLM Agent
-
-### 5.1 使用环境变量
-
-PowerShell：
+规则 Agent 浏览器观战：
 
 ```powershell
-$env:OPENAI_API_KEY="你的 API Key"
-$env:OPENAI_MODEL="gpt-4o-mini"
-python -m ai_werewolf run --games 1 --seed 42 --preset 6p --agent-mode llm --out logs/llm_demo --version-label openai_gpt4o_mini
-```
-
-也支持项目专用变量：
-
-```powershell
-$env:AI_WEREWOLF_LLM_API_KEY="你的 API Key"
-$env:AI_WEREWOLF_LLM_MODEL="gpt-4o-mini"
-$env:AI_WEREWOLF_LLM_BASE_URL="https://api.openai.com/v1"
-python -m ai_werewolf run --games 1 --preset 6p --agent-mode llm --out logs/llm_demo
-```
-
-### 5.2 直接通过命令行传参
-
-```bash
-python -m ai_werewolf run \
-  --games 1 \
-  --seed 42 \
-  --preset 6p \
-  --agent-mode llm \
-  --llm-api-key YOUR_API_KEY \
-  --llm-base-url https://api.openai.com/v1 \
-  --llm-model gpt-4o-mini \
-  --llm-temperature 0.2 \
-  --llm-max-tokens 700 \
-  --out logs/llm_demo \
-  --version-label openai_gpt4o_mini
-```
-
-### 5.3 接本地或代理 OpenAI-compatible 服务
-
-只要服务暴露 `/v1/chat/completions`，即可替换 `base_url`：
-
-```bash
-python -m ai_werewolf run \
-  --games 1 \
-  --preset 6p \
-  --agent-mode llm \
-  --llm-api-key local-key \
-  --llm-base-url http://127.0.0.1:8000/v1 \
-  --llm-model local-model \
-  --out logs/local_llm
-```
-
-### 5.4 JSON Mode
-
-部分 OpenAI-compatible 服务支持 JSON mode。支持时可加：
-
-```bash
---llm-json-mode
-```
-
-如果本地兼容服务不支持 `response_format`，不要加该参数。
-
-### 5.5 LLM 失败回退
-
-默认情况下，LLM 调用失败、输出无法解析或动作非法时，系统会尽量回退，保证对局不中断：
-
-- LLM 调用 / JSON 解析失败：`LLMAgent` 回退到 `RuleBasedAgent`。
-- LLM 返回非法游戏动作：`GameEngine` 使用合法 fallback 动作。
-
-如果希望严格暴露错误，可使用：
-
-```bash
---no-llm-rule-fallback
-```
-
----
-
-## 6. 运行命令行人机混战
-
-```bash
-python -m ai_werewolf run --games 1 --seed 42 --preset 10p-standard --human P1 --out logs/human_console
-```
-
-多个人类玩家：
-
-```bash
-python -m ai_werewolf run --games 1 --seed 42 --preset 10p-standard --human P1,P3 --out logs/human_console
-```
-
-人类 + LLM 混战：
-
-```bash
-python -m ai_werewolf run --games 1 --preset 6p --human P1 --agent-mode llm --out logs/human_llm
-```
-
-注意：命令行人机混战一次只支持一局。
-
----
-
-## 7. 启动浏览器观战 / 人机混战 UI
-
-规则 Agent 观战：
-
-```bash
-python -m ai_werewolf serve --preset 10p-standard --human "" --seed 42 --out logs/web_ai
-```
-
-人机混战：
-
-```bash
-python -m ai_werewolf serve --preset 10p-standard --human P1 --seed 42 --out logs/web_human
-```
-
-LLM Agent 浏览器观战：
-
-```bash
-python -m ai_werewolf serve --preset 6p --human "" --agent-mode llm --seed 42 --out logs/web_llm
+python -m ai_werewolf serve --preset 6p --human --seed 42 --out logs/web_rule
 ```
 
 打开：
@@ -229,162 +46,217 @@ python -m ai_werewolf serve --preset 6p --human "" --agent-mode llm --seed 42 --
 http://127.0.0.1:8765
 ```
 
-Web UI 能显示：
+## LLM Agent：统一默认配置
+
+在项目根目录创建 `.env`：
+
+```env
+AI_WEREWOLF_LLM_API_KEY=你的_API_KEY
+AI_WEREWOLF_LLM_BASE_URL=https://api.openai.com/v1
+AI_WEREWOLF_LLM_MODEL=gpt-4o-mini
+AI_WEREWOLF_LLM_TEMPERATURE=0.2
+AI_WEREWOLF_LLM_MAX_TOKENS=900
+AI_WEREWOLF_LLM_TIMEOUT=60
+AI_WEREWOLF_LLM_JSON_MODE=false
+```
+
+启动纯 AI 多 Agent LLM 观战：
+
+```powershell
+python -m ai_werewolf serve `
+  --preset 6p `
+  --human `
+  --agent-mode llm `
+  --seed 42 `
+  --out logs/web_llm
+```
+
+`--human` 表示没有浏览器人类玩家，所有席位都由 AI Agent 控制。如果写 `--human P1`，则 P1 会在浏览器行动面板中等待你操作。
+
+## LLM Agent：每个 Agent 独立配置
+
+你可以用两种方式给不同玩家设置不同模型或 API。
+
+### 方式一：按玩家写环境变量
+
+```env
+AI_WEREWOLF_LLM_API_KEY=默认_KEY
+AI_WEREWOLF_LLM_MODEL=gpt-4o-mini
+AI_WEREWOLF_LLM_BASE_URL=https://api.openai.com/v1
+
+AI_WEREWOLF_LLM_P1_MODEL=gpt-4o-mini
+AI_WEREWOLF_LLM_P1_TEMPERATURE=0.15
+
+AI_WEREWOLF_LLM_P2_API_KEY=另一个_KEY
+AI_WEREWOLF_LLM_P2_BASE_URL=https://api.deepseek.com/v1
+AI_WEREWOLF_LLM_P2_MODEL=deepseek-chat
+AI_WEREWOLF_LLM_P2_TEMPERATURE=0.65
+```
+
+支持的玩家专属变量格式：
+
+```text
+AI_WEREWOLF_LLM_P1_API_KEY
+AI_WEREWOLF_LLM_P1_API_KEY_ENV
+AI_WEREWOLF_LLM_P1_BASE_URL
+AI_WEREWOLF_LLM_P1_MODEL
+AI_WEREWOLF_LLM_P1_TEMPERATURE
+AI_WEREWOLF_LLM_P1_MAX_TOKENS
+AI_WEREWOLF_LLM_P1_TIMEOUT
+AI_WEREWOLF_LLM_P1_JSON_MODE
+AI_WEREWOLF_LLM_P1_ORGANIZATION
+```
+
+`P1` 可替换成 `P2`、`P3` 等。
+
+### 方式二：使用 JSON 配置文件
+
+复制示例文件：
+
+```powershell
+Copy-Item docs/llm_agents.example.json llm_agents.local.json
+```
+
+然后运行：
+
+```powershell
+python -m ai_werewolf serve `
+  --preset 6p `
+  --human `
+  --agent-mode llm `
+  --llm-agent-config llm_agents.local.json `
+  --seed 42 `
+  --out logs/web_llm_multi
+```
+
+配置结构：
+
+```json
+{
+  "default_profile": "balanced",
+  "default": {
+    "api_key_env": "AI_WEREWOLF_LLM_API_KEY",
+    "base_url": "https://api.openai.com/v1",
+    "model": "gpt-4o-mini",
+    "temperature": 0.2,
+    "max_tokens": 900,
+    "timeout": 60,
+    "json_mode": false
+  },
+  "profiles": {
+    "wolf_aggressive": {
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "base_url": "https://api.deepseek.com/v1",
+      "model": "deepseek-chat",
+      "temperature": 0.65
+    }
+  },
+  "agents": {
+    "P2": { "profile": "wolf_aggressive" },
+    "P3": { "model": "gpt-4o-mini", "temperature": 0.25 }
+  }
+}
+```
+
+不建议把真实 API Key 直接写进 JSON 文件。推荐写 `api_key_env`，再在 `.env` 中放真实密钥。
+
+配置优先级从高到低：
+
+```text
+玩家专属环境变量 > agents.Px > profile > default > 命令行共享参数 > 全局环境变量
+```
+
+## Web 前后端分离结构
+
+```text
+ai_werewolf/web/server.py        # 后端：HTTP API、会话、静态文件服务
+ai_werewolf/web/static/index.html
+ai_werewolf/web/static/styles.css
+ai_werewolf/web/static/app.js    # 前端：状态轮询、席位面板、时间线、人类行动面板
+```
+
+后端 API：
+
+```text
+GET  /api/state?god=0|1
+GET  /api/pending?player_id=P1
+GET  /api/review
+POST /api/action
+```
+
+浏览器 UI 会展示：
 
 - 当前阶段、轮次、胜负状态。
-- 玩家座位与存活状态。
-- 上帝视角身份开关。
-- 公开事件时间线。
+- 玩家席位、存活状态、上帝视角身份信息。
+- 公开事件时间线、事件搜索与过滤。
+- LLM Agent 配置概览，不展示 API Key。
 - 人类玩家行动面板。
-- 对局结束后保存 JSONL、review、HTML replay。
 
----
+## 输出文件
 
-## 8. 自定义角色
+`run` 和 `serve` 都会把运行产物保存到 `--out`：
+
+```text
+*.jsonl              # 结构化事件日志
+*_review.json        # 自动复盘
+*_replay.html        # 单局 HTML 回放
+leaderboard.*        # 批量评测时生成
+batch_summary.json   # 批量运行摘要
+```
+
+这些都是运行产物，默认已在 `.gitignore` 中忽略，不建议提交到仓库。
+
+## 信息泄漏防护
+
+公开事件会自动移除以下私密字段：
+
+```text
+reasoning_summary
+action_reasoning_summary
+private_reasoning_summary
+chain_of_thought
+raw_prompt
+raw_response
+private_history
+```
+
+这保证 `AgentObservation.public_history` 和 Web UI 时间线不会把“我是狼人”“我作为女巫已救人”等隐藏信息暴露给其他 Agent。私密事件和 system 事件仍保留完整信息用于复盘和调试。
+
+运行测试：
 
 ```bash
-python -m ai_werewolf run --games 1 --seed 7 --roles werewolf,werewolf,seer,witch,hunter,guard,villager,villager --out logs/custom
+pytest
 ```
 
-合法角色：
+其中 `tests/test_public_event_redaction.py` 会检查公开事件不会写入私密 reasoning。
 
-```text
-werewolf, seer, witch, hunter, guard, villager
-```
-
----
-
-## 9. 重新生成 Leaderboard
+## 批量评测与 Leaderboard
 
 ```bash
-python -m ai_werewolf leaderboard logs/batch_10p --out logs/batch_10p/rebuilt_leaderboard.json --markdown logs/batch_10p/rebuilt_leaderboard.md --html logs/batch_10p/rebuilt_leaderboard.html
+python -m ai_werewolf run --games 20 --seed 100 --preset 10p-standard --out logs/rule_10p
+python -m ai_werewolf run --games 20 --seed 100 --preset 10p-standard --agent-mode llm --out logs/llm_10p
+python -m ai_werewolf leaderboard logs/rule_10p logs/llm_10p --out logs/compare/leaderboard.json --markdown logs/compare/leaderboard.md --html logs/compare/leaderboard.html
 ```
 
-比较规则 Agent 与 LLM Agent：
+## 仓库清理建议
 
-```bash
-python -m ai_werewolf run --games 20 --seed 1 --preset 10p-standard --version-label rule_based_v2_1 --out logs/rule_v2_1
-python -m ai_werewolf run --games 20 --seed 1 --preset 10p-standard --agent-mode llm --version-label llm_model_v1 --out logs/llm_v1
-python -m ai_werewolf leaderboard logs/rule_v2_1 logs/llm_v1 --out logs/compare/leaderboard.json --markdown logs/compare/leaderboard.md --html logs/compare/leaderboard.html
-```
-
----
-
-## 10. 测试
-
-```bash
-python -m unittest discover tests
-```
-
-当前 v2.1 验证结果：
+不要提交以下内容：
 
 ```text
-Ran 10 tests
-OK
+logs/
+.idea/
+__pycache__/
+.env
+*.jsonl
+*_review.json
+*_replay.html
 ```
 
-测试覆盖：
+如果这些内容已经被 Git 跟踪，可以执行：
 
-- 6 人局完整闭环。
-- 10 人标准局完整闭环。
-- 猎人、守卫角色支持。
-- 信息隔离检查。
-- 自定义角色与人类玩家解析。
-- 猎人死亡后开枪动作合法性。
-- Leaderboard 生成。
-- LLM Agent Prompt / JSON Parser。
-- OpenAI-compatible Provider 本地 HTTP mock 测试。
-- Web 会话纯 AI 对战完成与产物保存。
-
----
-
-## 11. 目录结构
-
-```text
-ai-werewolf-mvp/
-├── ai_werewolf/
-│   ├── agents/          # RuleBasedAgent / LLMAgent / HumanAgent
-│   ├── configs/         # 板子配置
-│   ├── engine/          # GameEngine 对局引擎
-│   ├── eval/            # review / replay / leaderboard
-│   ├── llm/             # provider / prompt builder / parser
-│   ├── logging/         # EventStore JSONL
-│   ├── models/          # GameState / Action / Event / Observation
-│   ├── rules/           # 角色与动作合法性
-│   ├── visibility/      # 信息隔离
-│   ├── web/             # 本地浏览器观战与人机混战服务
-│   ├── cli.py
-│   └── __main__.py
-├── docs/
-│   └── DEVELOPMENT_PLAN.md
-├── tests/
-│   └── test_mvp.py
-├── logs/
-├── pyproject.toml
-└── README.md
+```powershell
+git rm -r --cached logs .idea
+Get-ChildItem -Recurse -Directory -Filter __pycache__ | ForEach-Object { git rm -r --cached $_.FullName }
+git add .gitignore
+git commit -m "Clean runtime artifacts from repository"
 ```
-
----
-
-## 12. LLM 接口实现文件
-
-```text
-ai_werewolf/llm/provider_base.py
-ai_werewolf/llm/openai_compatible_provider.py
-ai_werewolf/llm/prompt_builder.py
-ai_werewolf/llm/output_parser.py
-ai_werewolf/agents/llm_agent.py
-```
-
-核心调用链：
-
-```text
-GameEngine
-  ↓ VisibilityManager
-AgentObservation
-  ↓ PromptBuilder
-LLMAgent
-  ↓ OpenAICompatibleProvider
-/v1/chat/completions
-  ↓ OutputParser
-Action
-  ↓ ActionValidator
-GameEngine 结算
-```
-
----
-
-## 13. 核心设计原则
-
-### 13.1 GameState 与 AgentObservation 隔离
-
-`GameState` 是完整系统真相，只由 `GameEngine` 持有。Agent 永远只接收经过过滤的 `AgentObservation`。
-
-### 13.2 LLM 也不能越权
-
-LLM Prompt 只包含当前玩家可见信息。即使接入真实大模型，也不会把完整身份表、其他玩家私有技能结果、狼队私密信息泄露给无权限 Agent。
-
-### 13.3 日志可复盘
-
-所有关键行为都写入 `GameEvent`。LLM 模式下还记录：
-
-- provider
-- model
-- latency
-- LLM 错误
-- LLM 回退次数
-- engine fallback 次数
-
----
-
-## 14. 当前边界
-
-v2.1 已完成题目主体与进阶方向 ② 的可运行交付。仍可继续扩展：
-
-- Azure OpenAI 专用 Provider。
-- Ollama 原生 Provider。
-- React + WebSocket 高级前端。
-- 更多角色和复杂板子。
-- 自进化 Agent。
-
-当前版本已经具备完整本地运行、真实 LLM 接入、观战、复盘、评测和人机混战能力。

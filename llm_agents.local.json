@@ -1,0 +1,36 @@
+{
+  "default_profile": "balanced",
+  "default": {
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "base_url": "https://api.deepseek.com",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.2,
+    "max_tokens": 900,
+    "timeout": 60,
+    "json_mode": false
+  },
+  "profiles": {
+    "balanced": {
+      "temperature": 0.2
+    },
+    "wolf_aggressive": {
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "base_url": "https://api.deepseek.com",
+      "model": "deepseek-v4-flash",
+      "temperature": 0.65,
+      "max_tokens": 1100
+    },
+    "good_careful": {
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "base_url": "https://api.deepseek.com",
+      "model": "deepseek-v4-flash",
+      "temperature": 0.15,
+      "max_tokens": 1000
+    }
+  },
+  "agents": {
+    "P1": { "profile": "good_careful" },
+    "P2": { "profile": "wolf_aggressive" },
+    "P3": { "model": "deepseek-v4-flash", "temperature": 0.25 }
+  }
+}

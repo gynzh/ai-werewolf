@@ -1,7 +1,30 @@
+# IDE / local metadata
 .idea/
+.vscode/
+
+# Python
 __pycache__/
-*.pyc
-.env
+*.py[cod]
 *.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Builds
 dist/
 build/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Runtime artifacts
+logs/
+*.jsonl
+*_review.json
+*_replay.html
+leaderboard.json
+leaderboard.md
+leaderboard.html
+batch_summary.json
