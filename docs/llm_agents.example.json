@@ -22,19 +22,12 @@
     "local": {
       "api_key_env": "LOCAL_LLM_API_KEY",
       "base_url": "http://127.0.0.1:8000/v1",
-      "model": "local-model",
-      "json_mode": false
+      "model": "local-model"
     }
   },
   "agents": {
     "P1": { "profile": "strong" },
     "P2": { "profile": "fast" },
-    "P3": { "profile": "local" },
-    "P4": {
-      "api_key_env": "P4_LLM_API_KEY",
-      "base_url": "https://api.example.com/v1",
-      "model": "custom-model",
-      "temperature": 0.4
-    }
+    "P3": { "profile": "local" }
   }
 }
