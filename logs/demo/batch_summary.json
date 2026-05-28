@@ -1,0 +1,27 @@
+[
+  {
+    "game_index": 1,
+    "seed": 42,
+    "preset": "6p",
+    "roles": [
+      "werewolf",
+      "werewolf",
+      "seer",
+      "witch",
+      "villager",
+      "villager"
+    ],
+    "human_players": [],
+    "version_label": "rule_based_v2_1",
+    "agent_mode": "rule",
+    "llm_provider": null,
+    "llm_model": null,
+    "game_id": "game_3d58d6b8",
+    "winner": "wolves",
+    "win_reason": "神职全部死亡，狼人屠边胜利。",
+    "rounds": 2,
+    "log_path": "logs\\demo\\game_001_seed_42.jsonl",
+    "review_path": "logs\\demo\\game_001_seed_42_review.json",
+    "html_replay_path": "logs\\demo\\game_001_seed_42_replay.html"
+  }
+]
