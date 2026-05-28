@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-import os
+from dotenv import load_dotenv
+
 import argparse
 import json
 from pathlib import Path
@@ -35,7 +36,7 @@ def _add_agent_runtime_args(target: argparse.ArgumentParser, *, default_version:
 
 
 def main() -> None:
-    _load_dotenv()
+    load_dotenv()
     parser = argparse.ArgumentParser(description="AI Werewolf multi-agent system v2.1")
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -226,31 +227,6 @@ def _serve(args: argparse.Namespace) -> None:
     session.agent_factory = _build_agent_factory(args, human_players, web_session=session)
     run_web_server(session, host=args.host, port=args.port)
 
-def _load_dotenv(path: str = ".env") -> None:
-    """Load simple KEY=VALUE pairs from a .env file into os.environ.
-
-    Existing environment variables are not overwritten.
-    Supports blank lines and comments starting with #.
-    """
-    dotenv_path = Path(path)
-    if not dotenv_path.exists():
-        return
-
-    for raw_line in dotenv_path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-
-        if not line or line.startswith("#"):
-            continue
-
-        if "=" not in line:
-            continue
-
-        key, value = line.split("=", 1)
-        key = key.strip()
-        value = value.strip().strip('"').strip("'")
-
-        if key and key not in os.environ:
-            os.environ[key] = value
 
 if __name__ == "__main__":
     main()
