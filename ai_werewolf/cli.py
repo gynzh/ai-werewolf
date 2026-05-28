@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 from pathlib import Path
 from typing import Any
@@ -24,7 +25,7 @@ from ai_werewolf.eval.review import build_review, save_review
 from ai_werewolf.llm.agent_config import LLMAgentConfigResolver
 from ai_werewolf.llm.openai_compatible_provider import OpenAICompatibleProvider
 from ai_werewolf.llm.provider_base import ModelProvider
-from ai_werewolf.web.server import WebGameSession, run_web_server
+from ai_werewolf.web.server import WebGameSession, WebSessionManager, run_web_server
 
 
 def _add_agent_runtime_args(target: argparse.ArgumentParser, *, default_version: str) -> None:
@@ -46,7 +47,7 @@ def _add_agent_runtime_args(target: argparse.ArgumentParser, *, default_version:
 def main() -> None:
     load_dotenv()
 
-    parser = argparse.ArgumentParser(description="AI Werewolf multi-agent system v2.2")
+    parser = argparse.ArgumentParser(description="AI Werewolf multi-agent system v2.3")
     sub = parser.add_subparsers(dest="command", required=True)
 
     run_parser = sub.add_parser("run", help="run one or more local games; supports pure AI, LLM AI, or console human-AI mixed play")
@@ -55,7 +56,7 @@ def main() -> None:
     run_parser.add_argument("--out", type=str, default="logs", help="output directory")
     run_parser.add_argument("--preset", choices=available_presets(), default="6p", help="board preset")
     run_parser.add_argument("--roles", type=str, default=None, help="comma-separated roles; overrides --preset")
-    run_parser.add_argument("--human", type=str, default=None, help="comma-separated human player IDs, e.g. P1,P3; console input mode")
+    run_parser.add_argument("--human", type=str, nargs="?", const="", default=None, help="comma-separated human player IDs, e.g. P1,P3; omit value for pure AI")
     run_parser.add_argument("--max-days", type=int, default=10, help="maximum day/night rounds before forced wolf win")
     run_parser.add_argument("--tie-policy", choices=["no_exile", "random"], default="no_exile", help="day vote tie policy")
     run_parser.add_argument("--reveal-death-role", action="store_true", help="publicly reveal roles when players die")
@@ -71,19 +72,20 @@ def main() -> None:
     leaderboard_parser.add_argument("--markdown", type=str, default=None, help="optional markdown output path")
     leaderboard_parser.add_argument("--html", type=str, default=None, help="optional HTML output path")
 
-    serve_parser = sub.add_parser("serve", help="start local browser UI for live spectating and human-AI mixed play")
+    serve_parser = sub.add_parser("serve", help="start local browser UI; the browser can create isolated sessions")
     serve_parser.add_argument("--host", type=str, default="127.0.0.1")
-    serve_parser.add_argument("--port", type=int, default=8765)
+    serve_parser.add_argument("--port", type=int, default=0, help="HTTP port; 0 lets Windows choose a free port to avoid stale sessions")
     serve_parser.add_argument("--seed", type=int, default=42)
     serve_parser.add_argument("--out", type=str, default="logs/web")
     serve_parser.add_argument("--preset", choices=available_presets(), default="10p-standard")
     serve_parser.add_argument("--roles", type=str, default=None)
-    serve_parser.add_argument("--human", type=str, default="P1", nargs='?', const='', help="comma-separated browser-controlled human players; empty for pure AI")
+    serve_parser.add_argument("--human", type=str, nargs="?", const="", default="P1", help="browser-controlled human players; use --human or --human= for pure AI")
     serve_parser.add_argument("--max-days", type=int, default=10)
     serve_parser.add_argument("--tie-policy", choices=["no_exile", "random"], default="no_exile")
     serve_parser.add_argument("--reveal-death-role", action="store_true")
     serve_parser.add_argument("--version-label", type=str, default="web_rule_based_v2_1")
     serve_parser.add_argument("--no-leak-check", action="store_true")
+    serve_parser.add_argument("--event-delay", type=float, default=0.25, help="seconds to pause after each public event in Web mode; use 0 for fastest")
     _add_agent_runtime_args(serve_parser, default_version="web_rule_based_v2_1")
 
     args = parser.parse_args()
@@ -244,7 +246,7 @@ def _build_leaderboard(args: argparse.Namespace) -> None:
         print(f"leaderboard html: {args.html}")
 
 
-def _serve(args: argparse.Namespace) -> None:
+def _make_web_session(args: argparse.Namespace, *, request: dict[str, Any] | None = None) -> WebGameSession:
     roles = parse_roles(args.roles) if args.roles else None
     human_players = parse_player_ids(args.human)
     args.version_label = _normalized_version_label(args)
@@ -258,11 +260,102 @@ def _serve(args: argparse.Namespace) -> None:
         reveal_death_role=args.reveal_death_role,
         version_label=args.version_label,
     )
-    session = WebGameSession(config=config, out_dir=args.out, enable_leak_check=not args.no_leak_check)
+    session = WebGameSession(
+        config=config,
+        out_dir=args.out,
+        enable_leak_check=not args.no_leak_check,
+        public_event_delay_seconds=args.event_delay,
+        request=request or _safe_request_from_args(args),
+    )
     session.agent_mode = args.agent_mode
     session.llm_agent_config_path = args.llm_agent_config
     session.agent_factory = _build_agent_factory(args, human_players, web_session=session)
-    run_web_server(session, host=args.host, port=args.port)
+    return session
+
+
+def _serve(args: argparse.Namespace) -> None:
+    initial_session = _make_web_session(args)
+
+    def session_factory(data: dict[str, Any]) -> WebGameSession:
+        child_args = _args_from_browser_request(args, data)
+        return _make_web_session(child_args, request=_safe_request_from_args(child_args))
+
+    manager = WebSessionManager(session_factory=session_factory)
+    manager.add(initial_session, start=True, make_default=True)
+    run_web_server(manager, host=args.host, port=args.port)
+
+
+def _args_from_browser_request(base_args: argparse.Namespace, data: dict[str, Any]) -> argparse.Namespace:
+    args = argparse.Namespace(**copy.deepcopy(vars(base_args)))
+    string_fields = [
+        "preset",
+        "roles",
+        "human",
+        "out",
+        "tie_policy",
+        "version_label",
+        "agent_mode",
+        "llm_provider",
+        "llm_api_key",
+        "llm_base_url",
+        "llm_model",
+        "llm_agent_config",
+        "llm_agent_profile",
+    ]
+    int_fields = ["seed", "max_days", "llm_max_tokens"]
+    float_fields = ["llm_temperature", "llm_timeout", "event_delay"]
+    bool_fields = ["reveal_death_role", "no_leak_check", "llm_json_mode", "no_llm_rule_fallback"]
+
+    for field in string_fields:
+        if field in data:
+            setattr(args, field, _empty_to_none(data.get(field)) if field not in {"human", "roles"} else str(data.get(field) or ""))
+    for field in int_fields:
+        if field in data and data.get(field) not in {None, ""}:
+            setattr(args, field, int(data[field]))
+    for field in float_fields:
+        if field in data and data.get(field) not in {None, ""}:
+            setattr(args, field, float(data[field]))
+    for field in bool_fields:
+        if field in data:
+            setattr(args, field, _to_bool(data[field]))
+    return args
+
+
+def _empty_to_none(value: Any) -> Any:
+    if value is None:
+        return None
+    if isinstance(value, str) and not value.strip():
+        return None
+    return value
+
+
+def _to_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _safe_request_from_args(args: argparse.Namespace) -> dict[str, Any]:
+    data = {
+        "preset": args.preset,
+        "roles": args.roles,
+        "human": args.human,
+        "seed": args.seed,
+        "out": args.out,
+        "max_days": args.max_days,
+        "tie_policy": args.tie_policy,
+        "reveal_death_role": args.reveal_death_role,
+        "agent_mode": args.agent_mode,
+        "version_label": args.version_label,
+        "llm_provider": args.llm_provider if args.agent_mode == "llm" else None,
+        "llm_base_url": args.llm_base_url if args.agent_mode == "llm" else None,
+        "llm_model": args.llm_model if args.agent_mode == "llm" else None,
+        "llm_agent_config": args.llm_agent_config if args.agent_mode == "llm" else None,
+        "llm_agent_profile": args.llm_agent_profile if args.agent_mode == "llm" else None,
+        "llm_json_mode": args.llm_json_mode if args.agent_mode == "llm" else None,
+        "event_delay": args.event_delay,
+    }
+    return {k: v for k, v in data.items() if v is not None}
 
 
 if __name__ == "__main__":

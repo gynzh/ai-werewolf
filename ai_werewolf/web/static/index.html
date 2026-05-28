@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-store" />
   <title>AI Werewolf Observatory</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
@@ -13,13 +14,105 @@
         <div class="brand-mark">狼</div>
         <div>
           <h1>AI Werewolf</h1>
-          <p>Multi-Agent Observatory</p>
+          <p>Session-based Multi-Agent Observatory</p>
         </div>
       </div>
 
       <section class="panel compact">
-        <div class="panel-title">对局状态</div>
-        <div id="statusChips" class="chip-stack"></div>
+        <div class="panel-title">连接状态</div>
+        <div id="connectionStatus" class="connection idle">正在连接...</div>
+        <div id="serverMeta" class="muted meta-line">读取服务信息...</div>
+        <div class="session-copy">
+          <span>当前 Session</span>
+          <code id="sessionIdText">-</code>
+        </div>
+        <button id="copySessionButton" class="button ghost">复制当前链接</button>
+      </section>
+
+      <section class="panel compact">
+        <div class="panel-title">创建新局</div>
+        <form id="createForm" class="create-form">
+          <div class="form-row two">
+            <label>板子
+              <select name="preset">
+                <option value="6p">6p</option>
+                <option value="8p-simple">8p-simple</option>
+                <option value="10p-standard" selected>10p-standard</option>
+              </select>
+            </label>
+            <label>Seed
+              <input name="seed" type="number" value="42" />
+            </label>
+          </div>
+          <label>自定义角色（可选，逗号分隔）
+            <input name="roles" placeholder="werewolf,werewolf,seer,witch,villager,villager" />
+          </label>
+          <label>人类席位（空=纯 AI）
+            <input name="human" placeholder="P1 或 P1,P3；纯 AI 留空" />
+          </label>
+          <div class="form-row two">
+            <label>模式
+              <select name="agent_mode" id="agentModeInput">
+                <option value="rule">rule</option>
+                <option value="llm">llm</option>
+              </select>
+            </label>
+            <label>事件延迟
+              <input name="event_delay" type="number" step="0.1" min="0" value="0.25" />
+            </label>
+          </div>
+          <label>输出目录
+            <input name="out" value="logs/web" />
+          </label>
+          <details class="advanced">
+            <summary>LLM / 高级配置</summary>
+            <label>LLM Agent 配置 JSON
+              <input name="llm_agent_config" placeholder="llm_agents.local.json" />
+            </label>
+            <label>默认 Profile
+              <input name="llm_agent_profile" placeholder="fast / strong / local" />
+            </label>
+            <label>共享 Base URL
+              <input name="llm_base_url" placeholder="https://api.openai.com/v1" />
+            </label>
+            <label>共享 Model
+              <input name="llm_model" placeholder="gpt-4o-mini" />
+            </label>
+            <label>共享 API Key（本地调试可选；推荐用 .env）
+              <input name="llm_api_key" type="password" autocomplete="off" placeholder="留空则读取 .env / 环境变量" />
+            </label>
+            <div class="form-row two">
+              <label>Temperature
+                <input name="llm_temperature" type="number" min="0" max="2" step="0.1" placeholder="0.2" />
+              </label>
+              <label>Max Tokens
+                <input name="llm_max_tokens" type="number" min="1" placeholder="700" />
+              </label>
+            </div>
+            <label>Timeout 秒
+              <input name="llm_timeout" type="number" min="1" step="1" placeholder="60" />
+            </label>
+            <label class="check-row"><input type="checkbox" name="llm_json_mode" /> 开启 JSON mode</label>
+            <label class="check-row"><input type="checkbox" name="no_llm_rule_fallback" /> 禁用 LLM fallback</label>
+            <label class="check-row"><input type="checkbox" name="reveal_death_role" /> 死亡公开身份</label>
+            <label>最大天数
+              <input name="max_days" type="number" value="10" min="1" />
+            </label>
+            <label>平票策略
+              <select name="tie_policy">
+                <option value="no_exile">no_exile</option>
+                <option value="random">random</option>
+              </select>
+            </label>
+          </details>
+          <button class="button" type="submit">开始新 Session</button>
+          <div id="createStatus" class="muted"></div>
+        </form>
+      </section>
+
+      <section class="panel compact">
+        <div class="panel-title">Session Center</div>
+        <div id="sessionsList" class="sessions-list"></div>
       </section>
 
       <section class="panel compact">
@@ -42,12 +135,16 @@
     <main class="main">
       <header class="hero">
         <div>
-          <p class="eyebrow">实时观战 / 人机混战</p>
+          <p class="eyebrow">实时观战 / 多局隔离 / SSE 同步</p>
           <h2 id="heroTitle">等待对局启动</h2>
           <p id="heroSubtitle">正在连接本地后端...</p>
         </div>
         <div id="winnerCard" class="winner-card hidden"></div>
       </header>
+
+      <section class="panel status-panel">
+        <div id="statusChips" class="chip-stack"></div>
+      </section>
 
       <section class="dashboard-grid">
         <article class="panel players-panel">

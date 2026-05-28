@@ -1,37 +1,40 @@
 {
-  "default_profile": "balanced",
+  "default_profile": "fast",
   "default": {
     "api_key_env": "AI_WEREWOLF_LLM_API_KEY",
     "base_url": "https://api.openai.com/v1",
     "model": "gpt-4o-mini",
     "temperature": 0.2,
-    "max_tokens": 900,
+    "max_tokens": 700,
     "timeout": 60,
     "json_mode": false
   },
   "profiles": {
-    "balanced": {
+    "fast": {
+      "model": "gpt-4o-mini",
       "temperature": 0.2
     },
-    "wolf_aggressive": {
-      "api_key_env": "DEEPSEEK_API_KEY",
-      "base_url": "https://api.deepseek.com/v1",
-      "model": "deepseek-chat",
-      "temperature": 0.65,
-      "max_tokens": 1100
-    },
-    "good_careful": {
-      "api_key_env": "OPENAI_API_KEY",
-      "base_url": "https://api.openai.com/v1",
-      "model": "gpt-4o-mini",
+    "strong": {
+      "model": "gpt-4o",
       "temperature": 0.15,
       "max_tokens": 1000
+    },
+    "local": {
+      "api_key_env": "LOCAL_LLM_API_KEY",
+      "base_url": "http://127.0.0.1:8000/v1",
+      "model": "local-model",
+      "json_mode": false
     }
   },
   "agents": {
-    "P1": { "profile": "good_careful" },
-    "P2": { "profile": "wolf_aggressive" },
-    "P3": { "model": "gpt-4o-mini", "temperature": 0.25 },
-    "P4": { "api_key_env": "AI_WEREWOLF_LLM_P4_API_KEY", "model": "gpt-4o-mini" }
+    "P1": { "profile": "strong" },
+    "P2": { "profile": "fast" },
+    "P3": { "profile": "local" },
+    "P4": {
+      "api_key_env": "P4_LLM_API_KEY",
+      "base_url": "https://api.example.com/v1",
+      "model": "custom-model",
+      "temperature": 0.4
+    }
   }
 }

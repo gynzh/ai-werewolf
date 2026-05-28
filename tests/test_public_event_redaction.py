@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import tempfile
+import unittest
+from pathlib import Path
 
 from ai_werewolf.logging.event_store import EventStore
 from ai_werewolf.models.schema import GameEvent
@@ -21,49 +24,54 @@ def _event(payload: dict) -> GameEvent:
     )
 
 
-def test_public_events_remove_private_reasoning_from_memory_and_jsonl(tmp_path):
-    path = tmp_path / "game.jsonl"
-    store = EventStore(path)
-    store.append(
-        _event(
-            {
-                "content": "我是好人，P3 发言偏划水。",
-                "reasoning_summary": "作为狼人，我要隐藏身份并带票 P3。",
-                "confidence": 0.8,
-                "metadata": {"model": "demo", "llm_error": "secret provider error"},
-            }
+class TestPublicEventRedaction(unittest.TestCase):
+    def test_public_events_remove_private_reasoning_from_memory_and_jsonl(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "game.jsonl"
+            store = EventStore(path)
+            store.append(
+                _event(
+                    {
+                        "content": "我是好人，P3 发言偏划水。",
+                        "reasoning_summary": "作为狼人，我要隐藏身份并带票 P3。",
+                        "confidence": 0.8,
+                        "metadata": {"model": "demo", "llm_error": "secret provider error"},
+                    }
+                )
+            )
+            public_payload = store.public_events()[0].payload
+            self.assertEqual(
+                public_payload,
+                {
+                    "content": "我是好人，P3 发言偏划水。",
+                    "confidence": 0.8,
+                    "metadata": {"model": "demo"},
+                },
+            )
+            text = path.read_text(encoding="utf-8")
+            self.assertNotIn("作为狼人", text)
+            self.assertNotIn("reasoning_summary", text)
+            self.assertNotIn("llm_error", text)
+            row = json.loads(text)
+            self.assertEqual(row["payload"]["content"], "我是好人，P3 发言偏划水。")
+
+    def test_private_events_keep_reasoning_for_review(self) -> None:
+        store = EventStore()
+        private = GameEvent.create(
+            game_id="g_test",
+            round_index=1,
+            day_index=0,
+            night_index=1,
+            phase="seer_check",
+            visibility="private",
+            visible_to=["P3"],
+            actor_id="P3",
+            event_type="seer_check_result",
+            payload={"action_reasoning_summary": "我查验 P5 是狼人。"},
         )
-    )
-
-    public_payload = store.public_events()[0].payload
-    assert public_payload == {
-        "content": "我是好人，P3 发言偏划水。",
-        "confidence": 0.8,
-        "metadata": {"model": "demo"},
-    }
-
-    text = path.read_text(encoding="utf-8")
-    assert "作为狼人" not in text
-    assert "reasoning_summary" not in text
-    assert "llm_error" not in text
-
-    row = json.loads(text)
-    assert row["payload"]["content"] == "我是好人，P3 发言偏划水。"
+        store.append(private)
+        self.assertEqual(store.visible_events("P3")[0].payload["action_reasoning_summary"], "我查验 P5 是狼人。")
 
 
-def test_private_events_keep_reasoning_for_review():
-    store = EventStore()
-    private = GameEvent.create(
-        game_id="g_test",
-        round_index=1,
-        day_index=0,
-        night_index=1,
-        phase="seer_check",
-        visibility="private",
-        visible_to=["P3"],
-        actor_id="P3",
-        event_type="seer_check_result",
-        payload={"action_reasoning_summary": "我查验 P5 是狼人。"},
-    )
-    store.append(private)
-    assert store.visible_events("P3")[0].payload["action_reasoning_summary"] == "我查验 P5 是狼人。"
+if __name__ == "__main__":
+    unittest.main()

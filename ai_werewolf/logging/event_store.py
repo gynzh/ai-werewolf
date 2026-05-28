@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import threading
+import time
 from dataclasses import replace
 from pathlib import Path
 from typing import Any, Iterable
@@ -70,8 +71,9 @@ def sanitize_public_event(event: GameEvent) -> GameEvent:
 class EventStore:
     """Thread-safe in-memory event stream with optional JSONL persistence."""
 
-    def __init__(self, jsonl_path: str | Path | None = None) -> None:
+    def __init__(self, jsonl_path: str | Path | None = None, public_event_delay_seconds: float = 0.0) -> None:
         self.events: list[GameEvent] = []
+        self.public_event_delay_seconds = max(0.0, float(public_event_delay_seconds or 0.0))
         self.jsonl_path = Path(jsonl_path) if jsonl_path else None
         self._lock = threading.RLock()
         if self.jsonl_path:
@@ -85,6 +87,8 @@ class EventStore:
             if self.jsonl_path:
                 with self.jsonl_path.open("a", encoding="utf-8") as f:
                     f.write(json.dumps(safe_event.to_dict(), ensure_ascii=False) + "\n")
+        if safe_event.visibility == "public" and self.public_event_delay_seconds > 0:
+            time.sleep(self.public_event_delay_seconds)
 
     def extend(self, events: Iterable[GameEvent]) -> None:
         for event in events:
