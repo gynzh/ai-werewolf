@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>AI Werewolf Replay - game_26dab82d</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 32px; background: #f7f7f8; color: #202124; }
+h1, h2 { margin-bottom: 8px; }
+.summary { padding: 16px; background: white; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 24px; line-height: 1.8; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 16px 0 24px; }
+.card { background: white; border-radius: 12px; padding: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08); line-height: 1.7; }
+table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 24px; }
+th, td { border-bottom: 1px solid #eee; padding: 10px; vertical-align: top; text-align: left; }
+th { background: #eceff3; }
+pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #eceff3; margin-right: 8px; }
+</style>
+</head>
+<body>
+<h1>AI 狼人杀 v2.0 对局回放</h1>
+<div class="summary">
+<b>Game ID：</b>game_26dab82d<br>
+<b>胜利阵营：</b>狼人阵营<br>
+<b>胜负原因：</b>神职全部死亡，狼人屠边胜利。<br>
+<b>复盘摘要：</b>本局共进行 2 轮，狼人阵营获胜。死亡记录：P2(预言家,exiled)、P5(女巫,werewolf_kill)。好人投狼率：25.0%；狼人投好人率：100.0%。关键转折：预言家被白天放逐，好人信息链受损。；白天放逐了好人 P2，狼人阵营获得节奏收益。；好人神职成功阻止至少一次狼刀，改变夜间减员节奏。<br>
+<span class="badge">总事件 41</span>
+<span class="badge">公开事件 18</span>
+<span class="badge">好人投狼率 25.0%</span>
+<span class="badge">狼人投好人率 100.0%</span>
+<span class="badge">fallback 0</span>
+</div>
+<h2>身份与状态</h2>
+<div class="grid"><div class='card'><b>P1 · 1号玩家</b><br>身份：平民<br>阵营：好人阵营<br>状态：存活</div><div class='card'><b>P2 · 2号玩家</b><br>身份：预言家<br>阵营：好人阵营<br>状态：死亡：exiled</div><div class='card'><b>P3 · 3号玩家</b><br>身份：狼人<br>阵营：狼人阵营<br>状态：存活</div><div class='card'><b>P4 · 4号玩家</b><br>身份：狼人<br>阵营：狼人阵营<br>状态：存活</div><div class='card'><b>P5 · 5号玩家</b><br>身份：女巫<br>阵营：好人阵营<br>状态：死亡：werewolf_kill</div><div class='card'><b>P6 · 6号玩家</b><br>身份：平民<br>阵营：好人阵营<br>状态：存活</div></div>
+<h2>玩家表现摘要</h2>
+<table>
+<thead><tr><th>玩家</th><th>身份</th><th>存活</th><th>发言</th><th>投票</th><th>被投</th><th>投狼</th><th>投好人</th></tr></thead>
+<tbody><tr><td>P1</td><td>平民</td><td>是</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr><tr><td>P2</td><td>预言家</td><td>否</td><td>1</td><td>1</td><td>3</td><td>0</td><td>1</td></tr><tr><td>P3</td><td>狼人</td><td>是</td><td>1</td><td>1</td><td>1</td><td>0</td><td>1</td></tr><tr><td>P4</td><td>狼人</td><td>是</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td></tr><tr><td>P5</td><td>女巫</td><td>否</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td></tr><tr><td>P6</td><td>平民</td><td>是</td><td>1</td><td>1</td><td>1</td><td>0</td><td>1</td></tr></tbody>
+</table>
+<h2>关键转折</h2>
+<table><thead><tr><th>轮次</th><th>影响</th><th>说明</th></tr></thead><tbody><tr><td>1</td><td>high</td><td>预言家被白天放逐，好人信息链受损。</td></tr><tr><td>1</td><td>medium</td><td>白天放逐了好人 P2，狼人阵营获得节奏收益。</td></tr><tr><td>None</td><td>medium</td><td>好人神职成功阻止至少一次狼刀，改变夜间减员节奏。</td></tr></tbody></table>
+<h2>公开事件时间线</h2>
+<table>
+<thead><tr><th>轮次</th><th>阶段</th><th>事件</th><th>角色</th><th>内容</th></tr></thead>
+<tbody><tr><td>0</td><td>role_assignment</td><td>game_started</td><td>系统</td><td><pre>{
+  &quot;game_id&quot;: &quot;game_26dab82d&quot;,
+  &quot;player_count&quot;: 6,
+  &quot;players&quot;: [
+    {
+      &quot;player_id&quot;: &quot;P1&quot;,
+      &quot;seat&quot;: 1,
+      &quot;name&quot;: &quot;1号玩家&quot;,
+      &quot;alive&quot;: true,
+      &quot;death_round&quot;: null,
+      &quot;death_reason&quot;: null,
+      &quot;is_human&quot;: false
+    },
+    {
+      &quot;player_id&quot;: &quot;P2&quot;,
+      &quot;seat&quot;: 2,
+      &quot;name&quot;: &quot;2号玩家&quot;,
+      &quot;alive&quot;: true,
+      &quot;death_round&quot;: null,
+      &quot;death_reason&quot;: null,
+      &quot;is_human&quot;: false
+    },
+    {
+      &quot;player_id&quot;: &quot;P3&quot;,
+      &quot;seat&quot;: 3,
+      &quot;name&quot;: &quot;3号玩家&quot;,
+      &quot;alive&quot;: true,
+      &quot;death_round&quot;: null,
+      &quot;death_reason&quot;: null,
+      &quot;is_human&quot;: false
+    },
+    {
+      &quot;player_id&quot;: &quot;P4&quot;,
+      &quot;seat&quot;: 4,
+      &quot;name&quot;: &quot;4号玩家&quot;,
+      &quot;alive&quot;: true,
+      &quot;death_round&quot;: null,
+      &quot;death_reason&quot;: null,
+      &quot;is_human&quot;: false
+    },
+    {
+      &quot;player_id&quot;: &quot;P5&quot;,
+      &quot;seat&quot;: 5,
+      &quot;name&quot;: &quot;5号玩家&quot;,
+      &quot;alive&quot;: true,
+      &quot;death_round&quot;: null,
+      &quot;death_reason&quot;: null,
+      &quot;is_human&quot;: false
+    },
+    {
+      &quot;player_id&quot;: &quot;P6&quot;,
+      &quot;seat&quot;: 6,
+      &quot;name&quot;: &quot;6号玩家&quot;,
+      &quot;alive&quot;: true,
+      &quot;death_round&quot;: null,
+      &quot;death_reason&quot;: null,
+      &quot;is_human&quot;: false
+    }
+  ],
+  &quot;roles_config&quot;: [
+    &quot;werewolf&quot;,
+    &quot;werewolf&quot;,
+    &quot;seer&quot;,
+    &quot;witch&quot;,
+    &quot;villager&quot;,
+    &quot;villager&quot;
+  ],
+  &quot;rule_set&quot;: &quot;AI Werewolf v2.0 local multi-agent rules&quot;,
+  &quot;version_label&quot;: &quot;rule_based_v2&quot;
+}</pre></td></tr><tr><td>1</td><td>night_start</td><td>night_started</td><td>系统</td><td><pre>{
+  &quot;night_index&quot;: 1
+}</pre></td></tr><tr><td>1</td><td>day_announcement</td><td>day_announced</td><td>系统</td><td><pre>{
+  &quot;day_index&quot;: 1,
+  &quot;last_night_deaths&quot;: [],
+  &quot;message&quot;: &quot;昨夜无人死亡&quot;
+}</pre></td></tr><tr><td>1</td><td>day_discussion</td><td>player_speech</td><td>P1</td><td><pre>{
+  &quot;content&quot;: &quot;我是平民，没有夜间信息。我主要看发言和投票一致性，目前更怀疑 P2。&quot;,
+  &quot;reasoning_summary&quot;: &quot;基于可见历史，将 P2 作为当前主要关注对象。&quot;,
+  &quot;confidence&quot;: 0.6
+}</pre></td></tr><tr><td>1</td><td>day_discussion</td><td>player_speech</td><td>P2</td><td><pre>{
+  &quot;content&quot;: &quot;我是预言家，目前没有查到狼人。我更想听 P1 解释自己的发言和投票逻辑。&quot;,
+  &quot;reasoning_summary&quot;: &quot;基于可见历史，将 P1 作为当前主要关注对象。&quot;,
+  &quot;confidence&quot;: 0.6
+}</pre></td></tr><tr><td>1</td><td>day_discussion</td><td>player_speech</td><td>P3</td><td><pre>{
+  &quot;content&quot;: &quot;我这里是好人视角。当前 P2 的发言和站边最需要解释，建议先听清楚他的逻辑，不要急着跟票。&quot;,
+  &quot;reasoning_summary&quot;: &quot;基于可见历史，将 P2 作为当前主要关注对象。&quot;,
+  &quot;confidence&quot;: 0.6
+}</pre></td></tr><tr><td>1</td><td>day_discussion</td><td>player_speech</td><td>P4</td><td><pre>{
+  &quot;content&quot;: &quot;我这里是好人视角。当前 P2 的发言和站边最需要解释，建议先听清楚他的逻辑，不要急着跟票。&quot;,
+  &quot;reasoning_summary&quot;: &quot;基于可见历史，将 P2 作为当前主要关注对象。&quot;,
+  &quot;confidence&quot;: 0.6
+}</pre></td></tr><tr><td>1</td><td>day_discussion</td><td>player_speech</td><td>P5</td><td><pre>{
+  &quot;content&quot;: &quot;我是女巫，暂时不展开夜间细节。今天我比较关注 P6，他的行为和场上节奏不够一致。&quot;,
+  &quot;reasoning_summary&quot;: &quot;基于可见历史，将 P6 作为当前主要关注对象。&quot;,
+  &quot;confidence&quot;: 0.6
+}</pre></td></tr><tr><td>1</td><td>day_discussion</td><td>player_speech</td><td>P6</td><td><pre>{
+  &quot;content&quot;: &quot;我是平民，没有夜间信息。我主要看发言和投票一致性，目前更怀疑 P5。&quot;,
+  &quot;reasoning_summary&quot;: &quot;基于可见历史，将 P5 作为当前主要关注对象。&quot;,
+  &quot;confidence&quot;: 0.6
+}</pre></td></tr><tr><td>1</td><td>day_vote</td><td>vote_cast</td><td>P1</td><td><pre>{
+  &quot;target_player_id&quot;: &quot;P3&quot;,
+  &quot;reasoning_summary&quot;: &quot;投票给 P3，其公开行为或信息链疑点最高。&quot;,
+  &quot;confidence&quot;: 0.61
+}</pre></td></tr><tr><td>1</td><td>day_vote</td><td>vote_cast</td><td>P2</td><td><pre>{
+  &quot;target_player_id&quot;: &quot;P1&quot;,
+  &quot;reasoning_summary&quot;: &quot;投票给 P1，其公开行为或信息链疑点最高。&quot;,
+  &quot;confidence&quot;: 0.61
+}</pre></td></tr><tr><td>1</td><td>day_vote</td><td>vote_cast</td><td>P3</td><td><pre>{
+  &quot;target_player_id&quot;: &quot;P2&quot;,
+  &quot;reasoning_summary&quot;: &quot;投票给 P2，其公开行为或信息链疑点最高。&quot;,
+  &quot;confidence&quot;: 0.61
+}</pre></td></tr><tr><td>1</td><td>day_vote</td><td>vote_cast</td><td>P4</td><td><pre>{
+  &quot;target_player_id&quot;: &quot;P2&quot;,
+  &quot;reasoning_summary&quot;: &quot;投票给 P2，其公开行为或信息链疑点最高。&quot;,
+  &quot;confidence&quot;: 0.61
+}</pre></td></tr><tr><td>1</td><td>day_vote</td><td>vote_cast</td><td>P5</td><td><pre>{
+  &quot;target_player_id&quot;: &quot;P6&quot;,
+  &quot;reasoning_summary&quot;: &quot;投票给 P6，其公开行为或信息链疑点最高。&quot;,
+  &quot;confidence&quot;: 0.61
+}</pre></td></tr><tr><td>1</td><td>day_vote</td><td>vote_cast</td><td>P6</td><td><pre>{
+  &quot;target_player_id&quot;: &quot;P2&quot;,
+  &quot;reasoning_summary&quot;: &quot;投票给 P2，其公开行为或信息链疑点最高。&quot;,
+  &quot;confidence&quot;: 0.61
+}</pre></td></tr><tr><td>1</td><td>exile_resolution</td><td>exile_resolved</td><td>系统</td><td><pre>{
+  &quot;exiled_player_id&quot;: &quot;P2&quot;,
+  &quot;votes&quot;: {
+    &quot;P1&quot;: &quot;P3&quot;,
+    &quot;P2&quot;: &quot;P1&quot;,
+    &quot;P3&quot;: &quot;P2&quot;,
+    &quot;P4&quot;: &quot;P2&quot;,
+    &quot;P5&quot;: &quot;P6&quot;,
+    &quot;P6&quot;: &quot;P2&quot;
+  }
+}</pre></td></tr><tr><td>2</td><td>night_start</td><td>night_started</td><td>系统</td><td><pre>{
+  &quot;night_index&quot;: 2
+}</pre></td></tr><tr><td>2</td><td>game_end</td><td>game_ended</td><td>系统</td><td><pre>{
+  &quot;winner&quot;: &quot;wolves&quot;,
+  &quot;win_reason&quot;: &quot;神职全部死亡，狼人屠边胜利。&quot;,
+  &quot;roles&quot;: {
+    &quot;P1&quot;: {
+      &quot;seat&quot;: 1,
+      &quot;name&quot;: &quot;1号玩家&quot;,
+      &quot;role&quot;: &quot;villager&quot;,
+      &quot;role_cn&quot;: &quot;平民&quot;,
+      &quot;faction&quot;: &quot;good&quot;,
+      &quot;alive&quot;: true,
+      &quot;death_reason&quot;: null,
+      &quot;is_human&quot;: false
+    },
+    &quot;P2&quot;: {
+      &quot;seat&quot;: 2,
+      &quot;name&quot;: &quot;2号玩家&quot;,
+      &quot;role&quot;: &quot;seer&quot;,
+      &quot;role_cn&quot;: &quot;预言家&quot;,
+      &quot;faction&quot;: &quot;good&quot;,
+      &quot;alive&quot;: false,
+      &quot;death_reason&quot;: &quot;exiled&quot;,
+      &quot;is_human&quot;: false
+    },
+    &quot;P3&quot;: {
+      &quot;seat&quot;: 3,
+      &quot;name&quot;: &quot;3号玩家&quot;,
+      &quot;role&quot;: &quot;werewolf&quot;,
+      &quot;role_cn&quot;: &quot;狼人&quot;,
+      &quot;faction&quot;: &quot;wolves&quot;,
+      &quot;alive&quot;: true,
+      &quot;death_reason&quot;: null,
+      &quot;is_human&quot;: false
+    },
+    &quot;P4&quot;: {
+      &quot;seat&quot;: 4,
+      &quot;name&quot;: &quot;4号玩家&quot;,
+      &quot;role&quot;: &quot;werewolf&quot;,
+      &quot;role_cn&quot;: &quot;狼人&quot;,
+      &quot;faction&quot;: &quot;wolves&quot;,
+      &quot;alive&quot;: true,
+      &quot;death_reason&quot;: null,
+      &quot;is_human&quot;: false
+    },
+    &quot;P5&quot;: {
+      &quot;seat&quot;: 5,
+      &quot;name&quot;: &quot;5号玩家&quot;,
+      &quot;role&quot;: &quot;witch&quot;,
+      &quot;role_cn&quot;: &quot;女巫&quot;,
+      &quot;faction&quot;: &quot;good&quot;,
+      &quot;alive&quot;: false,
+      &quot;death_reason&quot;: &quot;werewolf_kill&quot;,
+      &quot;is_human&quot;: false
+    },
+    &quot;P6&quot;: {
+      &quot;seat&quot;: 6,
+      &quot;name&quot;: &quot;6号玩家&quot;,
+      &quot;role&quot;: &quot;villager&quot;,
+      &quot;role_cn&quot;: &quot;平民&quot;,
+      &quot;faction&quot;: &quot;good&quot;,
+      &quot;alive&quot;: true,
+      &quot;death_reason&quot;: null,
+      &quot;is_human&quot;: false
+    }
+  }
+}</pre></td></tr></tbody>
+</table>
+</body>
+</html>

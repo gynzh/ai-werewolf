@@ -1,0 +1,27 @@
+[
+  {
+    "game_index": 1,
+    "seed": 1100,
+    "preset": "6p",
+    "roles": [
+      "werewolf",
+      "werewolf",
+      "seer",
+      "witch",
+      "villager",
+      "villager"
+    ],
+    "human_players": [],
+    "version_label": "mock_llm_v2_1",
+    "agent_mode": "llm",
+    "llm_provider": "openai-compatible",
+    "llm_model": "mock-llm",
+    "game_id": "game_ae63dc43",
+    "winner": "wolves",
+    "win_reason": "神职全部死亡，狼人屠边胜利。",
+    "rounds": 2,
+    "log_path": "logs/v2_1_llm_mock/game_001_seed_1100.jsonl",
+    "review_path": "logs/v2_1_llm_mock/game_001_seed_1100_review.json",
+    "html_replay_path": "logs/v2_1_llm_mock/game_001_seed_1100_replay.html"
+  }
+]

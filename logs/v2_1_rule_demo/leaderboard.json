@@ -1,0 +1,148 @@
+{
+  "schema_version": "2.0",
+  "total_games": 2,
+  "overall": {
+    "total_games": 2,
+    "winner_counts": {
+      "wolves": 2
+    },
+    "good_win_rate": 0.0,
+    "wolves_win_rate": 1.0,
+    "avg_rounds": 4.0,
+    "avg_good_vote_to_wolf_rate": 0.368,
+    "avg_wolf_vote_to_good_rate": 1.0,
+    "avg_fallback_count": 0.0,
+    "avg_llm_action_count": 0.0,
+    "avg_llm_rule_fallback_count": 0.0,
+    "avg_llm_error_count": 0.0
+  },
+  "by_version": {
+    "rule_based_v2_1": {
+      "total_games": 2,
+      "winner_counts": {
+        "wolves": 2
+      },
+      "good_win_rate": 0.0,
+      "wolves_win_rate": 1.0,
+      "avg_rounds": 4.0,
+      "avg_good_vote_to_wolf_rate": 0.368,
+      "avg_wolf_vote_to_good_rate": 1.0,
+      "avg_fallback_count": 0.0,
+      "avg_llm_action_count": 0.0,
+      "avg_llm_rule_fallback_count": 0.0,
+      "avg_llm_error_count": 0.0
+    }
+  },
+  "role_survival": {
+    "hunter": {
+      "appearances": 2,
+      "survived": 0,
+      "survival_rate": 0.0
+    },
+    "witch": {
+      "appearances": 2,
+      "survived": 0,
+      "survival_rate": 0.0
+    },
+    "villager": {
+      "appearances": 6,
+      "survived": 5,
+      "survival_rate": 0.833
+    },
+    "seer": {
+      "appearances": 2,
+      "survived": 0,
+      "survival_rate": 0.0
+    },
+    "werewolf": {
+      "appearances": 6,
+      "survived": 3,
+      "survival_rate": 0.5
+    },
+    "guard": {
+      "appearances": 2,
+      "survived": 0,
+      "survival_rate": 0.0
+    }
+  },
+  "role_win_rate": {
+    "hunter": {
+      "appearances": 2,
+      "wins": 0,
+      "win_rate": 0.0
+    },
+    "witch": {
+      "appearances": 2,
+      "wins": 0,
+      "win_rate": 0.0
+    },
+    "villager": {
+      "appearances": 6,
+      "wins": 0,
+      "win_rate": 0.0
+    },
+    "seer": {
+      "appearances": 2,
+      "wins": 0,
+      "win_rate": 0.0
+    },
+    "werewolf": {
+      "appearances": 6,
+      "wins": 6,
+      "win_rate": 1.0
+    },
+    "guard": {
+      "appearances": 2,
+      "wins": 0,
+      "win_rate": 0.0
+    }
+  },
+  "games": [
+    {
+      "game_id": "game_8563e4de",
+      "version_label": "rule_based_v2_1",
+      "winner": "wolves",
+      "rounds": 3,
+      "preset_roles": [
+        "werewolf",
+        "werewolf",
+        "werewolf",
+        "seer",
+        "witch",
+        "hunter",
+        "guard",
+        "villager",
+        "villager",
+        "villager"
+      ],
+      "summary": "本局共进行 3 轮，狼人阵营获胜。死亡记录：P1(猎人,werewolf_kill)、P2(女巫,hunter_shot)、P5(预言家,exiled)、P7(狼人,exiled)、P10(守卫,werewolf_kill)。好人投狼率：54.5%；狼人投好人率：100.0%。关键转折：预言家被白天放逐，好人信息链受损。；狼人因 exiled 出局，好人阵营获得关键优势。；白天放逐了好人 P5，狼人阵营获得节奏收益。",
+      "good_vote_to_wolf_rate": 0.545,
+      "fallback_count": 0,
+      "llm_action_count": 0,
+      "llm_rule_fallback_count": 0
+    },
+    {
+      "game_id": "game_cdd341bc",
+      "version_label": "rule_based_v2_1",
+      "winner": "wolves",
+      "rounds": 5,
+      "preset_roles": [
+        "werewolf",
+        "werewolf",
+        "werewolf",
+        "seer",
+        "witch",
+        "hunter",
+        "guard",
+        "villager",
+        "villager",
+        "villager"
+      ],
+      "summary": "本局共进行 5 轮，狼人阵营获胜。死亡记录：P2(守卫,exiled)、P4(猎人,werewolf_kill)、P5(平民,exiled)、P7(女巫,werewolf_kill)、P8(狼人,exiled)、P9(预言家,exiled)、P10(狼人,hunter_shot)。好人投狼率：19.0%；狼人投好人率：100.0%。关键转折：狼人因 exiled 出局，好人阵营获得关键优势。；预言家被白天放逐，好人信息链受损。；狼人因 hunter_shot 出局，好人阵营获得关键优势。",
+      "good_vote_to_wolf_rate": 0.19,
+      "fallback_count": 0,
+      "llm_action_count": 0,
+      "llm_rule_fallback_count": 0
+    }
+  ]
+}

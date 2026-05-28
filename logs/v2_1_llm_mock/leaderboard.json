@@ -1,0 +1,101 @@
+{
+  "schema_version": "2.0",
+  "total_games": 1,
+  "overall": {
+    "total_games": 1,
+    "winner_counts": {
+      "wolves": 1
+    },
+    "good_win_rate": 0.0,
+    "wolves_win_rate": 1.0,
+    "avg_rounds": 2.0,
+    "avg_good_vote_to_wolf_rate": 0.333,
+    "avg_wolf_vote_to_good_rate": 0.5,
+    "avg_fallback_count": 16.0,
+    "avg_llm_action_count": 21.0,
+    "avg_llm_rule_fallback_count": 0.0,
+    "avg_llm_error_count": 0.0
+  },
+  "by_version": {
+    "mock_llm_v2_1": {
+      "total_games": 1,
+      "winner_counts": {
+        "wolves": 1
+      },
+      "good_win_rate": 0.0,
+      "wolves_win_rate": 1.0,
+      "avg_rounds": 2.0,
+      "avg_good_vote_to_wolf_rate": 0.333,
+      "avg_wolf_vote_to_good_rate": 0.5,
+      "avg_fallback_count": 16.0,
+      "avg_llm_action_count": 21.0,
+      "avg_llm_rule_fallback_count": 0.0,
+      "avg_llm_error_count": 0.0
+    }
+  },
+  "role_survival": {
+    "seer": {
+      "appearances": 1,
+      "survived": 0,
+      "survival_rate": 0.0
+    },
+    "witch": {
+      "appearances": 1,
+      "survived": 0,
+      "survival_rate": 0.0
+    },
+    "villager": {
+      "appearances": 2,
+      "survived": 1,
+      "survival_rate": 0.5
+    },
+    "werewolf": {
+      "appearances": 2,
+      "survived": 2,
+      "survival_rate": 1.0
+    }
+  },
+  "role_win_rate": {
+    "seer": {
+      "appearances": 1,
+      "wins": 0,
+      "win_rate": 0.0
+    },
+    "witch": {
+      "appearances": 1,
+      "wins": 0,
+      "win_rate": 0.0
+    },
+    "villager": {
+      "appearances": 2,
+      "wins": 0,
+      "win_rate": 0.0
+    },
+    "werewolf": {
+      "appearances": 2,
+      "wins": 2,
+      "win_rate": 1.0
+    }
+  },
+  "games": [
+    {
+      "game_id": "game_ae63dc43",
+      "version_label": "mock_llm_v2_1",
+      "winner": "wolves",
+      "rounds": 2,
+      "preset_roles": [
+        "werewolf",
+        "werewolf",
+        "seer",
+        "witch",
+        "villager",
+        "villager"
+      ],
+      "summary": "本局共进行 2 轮，狼人阵营获胜。死亡记录：P1(预言家,werewolf_kill)、P2(女巫,werewolf_kill)、P4(平民,exiled)。好人投狼率：33.3%；狼人投好人率：50.0%。LLM 行动次数：21，LLM 回退次数：0。关键转折：白天放逐了好人 P4，狼人阵营获得节奏收益。；狼人夜间成功击杀预言家，好人信息来源受损。",
+      "good_vote_to_wolf_rate": 0.333,
+      "fallback_count": 16,
+      "llm_action_count": 21,
+      "llm_rule_fallback_count": 0
+    }
+  ]
+}

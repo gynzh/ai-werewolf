@@ -1,0 +1,340 @@
+{
+  "schema_version": "2.0",
+  "game_id": "game_1eeebdc1",
+  "winner": "wolves",
+  "winner_cn": "狼人阵营",
+  "win_reason": "平民全部死亡，狼人屠边胜利。",
+  "rounds": 2,
+  "days": 2,
+  "config": {
+    "player_count": 6,
+    "roles": [
+      "werewolf",
+      "werewolf",
+      "seer",
+      "witch",
+      "villager",
+      "villager"
+    ],
+    "win_mode": "kill_side",
+    "tie_policy": "no_exile",
+    "max_days": 10,
+    "random_seed": 900,
+    "human_players": [],
+    "version_label": "web_rule_based_v2"
+  },
+  "roles": {
+    "P1": {
+      "seat": 1,
+      "name": "1号玩家",
+      "role": "villager",
+      "role_cn": "平民",
+      "faction": "good",
+      "faction_cn": "好人阵营",
+      "alive": false,
+      "death_reason": "werewolf_kill",
+      "is_human": false
+    },
+    "P2": {
+      "seat": 2,
+      "name": "2号玩家",
+      "role": "witch",
+      "role_cn": "女巫",
+      "faction": "good",
+      "faction_cn": "好人阵营",
+      "alive": true,
+      "death_reason": null,
+      "is_human": false
+    },
+    "P3": {
+      "seat": 3,
+      "name": "3号玩家",
+      "role": "werewolf",
+      "role_cn": "狼人",
+      "faction": "wolves",
+      "faction_cn": "狼人阵营",
+      "alive": true,
+      "death_reason": null,
+      "is_human": false
+    },
+    "P4": {
+      "seat": 4,
+      "name": "4号玩家",
+      "role": "seer",
+      "role_cn": "预言家",
+      "faction": "good",
+      "faction_cn": "好人阵营",
+      "alive": false,
+      "death_reason": "exiled",
+      "is_human": false
+    },
+    "P5": {
+      "seat": 5,
+      "name": "5号玩家",
+      "role": "werewolf",
+      "role_cn": "狼人",
+      "faction": "wolves",
+      "faction_cn": "狼人阵营",
+      "alive": true,
+      "death_reason": null,
+      "is_human": false
+    },
+    "P6": {
+      "seat": 6,
+      "name": "6号玩家",
+      "role": "villager",
+      "role_cn": "平民",
+      "faction": "good",
+      "faction_cn": "好人阵营",
+      "alive": false,
+      "death_reason": "exiled",
+      "is_human": false
+    }
+  },
+  "deaths": [
+    {
+      "player_id": "P1",
+      "seat": 1,
+      "role": "villager",
+      "role_cn": "平民",
+      "faction": "good",
+      "faction_cn": "好人阵营",
+      "death_round": 2,
+      "death_reason": "werewolf_kill"
+    },
+    {
+      "player_id": "P4",
+      "seat": 4,
+      "role": "seer",
+      "role_cn": "预言家",
+      "faction": "good",
+      "faction_cn": "好人阵营",
+      "death_round": 1,
+      "death_reason": "exiled"
+    },
+    {
+      "player_id": "P6",
+      "seat": 6,
+      "role": "villager",
+      "role_cn": "平民",
+      "faction": "good",
+      "faction_cn": "好人阵营",
+      "death_round": 2,
+      "death_reason": "exiled"
+    }
+  ],
+  "metrics": {
+    "total_events": 51,
+    "public_events": 28,
+    "private_events": 11,
+    "faction_events": 10,
+    "system_events": 2,
+    "speech_count_by_player": {
+      "P1": 1,
+      "P2": 2,
+      "P3": 2,
+      "P4": 1,
+      "P5": 2,
+      "P6": 2
+    },
+    "vote_accuracy_good_to_wolf": 0.333,
+    "vote_accuracy_wolf_to_good": 1.0,
+    "seer_checks": [
+      {
+        "night": 1,
+        "seer": "P4",
+        "target": "P6",
+        "target_faction": "good",
+        "target_faction_cn": "好人阵营"
+      }
+    ],
+    "witch_actions": [
+      {
+        "night": 1,
+        "witch": "P2",
+        "action_type": "witch_save",
+        "target": "P1",
+        "reasoning_summary": "第 1 夜使用解药救 P1，避免好人过早减员。"
+      },
+      {
+        "night": 2,
+        "witch": "P2",
+        "action_type": "skip",
+        "target": null,
+        "reasoning_summary": "当前用药收益不足，选择保留或跳过。"
+      }
+    ],
+    "guard_actions": [],
+    "hunter_actions": [],
+    "wolf_kill_targets": [
+      {
+        "night": 1,
+        "target": "P1",
+        "target_role": "villager",
+        "target_role_cn": "平民",
+        "target_faction": "good",
+        "saved_by_witch": true,
+        "saved_by_guard": false,
+        "killed": false
+      },
+      {
+        "night": 2,
+        "target": "P1",
+        "target_role": "villager",
+        "target_role_cn": "平民",
+        "target_faction": "good",
+        "saved_by_witch": false,
+        "saved_by_guard": false,
+        "killed": true
+      }
+    ],
+    "exiles": [
+      {
+        "day": 1,
+        "target": "P4",
+        "target_role": "seer",
+        "target_role_cn": "预言家",
+        "target_faction": "good",
+        "votes": {
+          "P1": "P4",
+          "P2": "P6",
+          "P3": "P4",
+          "P4": "P5",
+          "P5": "P4",
+          "P6": "P4"
+        },
+        "reason": null
+      },
+      {
+        "day": 2,
+        "target": "P6",
+        "target_role": "villager",
+        "target_role_cn": "平民",
+        "target_faction": "good",
+        "votes": {
+          "P2": "P6",
+          "P3": "P6",
+          "P5": "P6",
+          "P6": "P3"
+        },
+        "reason": null
+      }
+    ],
+    "process_metrics": {
+      "fallback_count": 0,
+      "fallback_rate_per_event": 0.0,
+      "wolf_kill_good_rate": 1.0,
+      "wolf_kill_god_rate": 0.0,
+      "seer_found_wolf_count": 0,
+      "witch_poison_count": 0,
+      "guard_protect_count": 0,
+      "guard_successful_save_count": 0,
+      "hunter_shot_count": 0,
+      "good_vote_to_wolf_rate": 0.333,
+      "wolf_vote_to_good_rate": 1.0
+    },
+    "player_reports": {
+      "P1": {
+        "seat": 1,
+        "role": "villager",
+        "role_cn": "平民",
+        "faction": "good",
+        "alive": false,
+        "death_reason": "werewolf_kill",
+        "speeches": 1,
+        "votes_cast": 1,
+        "votes_received": 0,
+        "votes_to_wolves": 0,
+        "votes_to_good": 1
+      },
+      "P2": {
+        "seat": 2,
+        "role": "witch",
+        "role_cn": "女巫",
+        "faction": "good",
+        "alive": true,
+        "death_reason": null,
+        "speeches": 2,
+        "votes_cast": 2,
+        "votes_received": 0,
+        "votes_to_wolves": 0,
+        "votes_to_good": 2
+      },
+      "P3": {
+        "seat": 3,
+        "role": "werewolf",
+        "role_cn": "狼人",
+        "faction": "wolves",
+        "alive": true,
+        "death_reason": null,
+        "speeches": 2,
+        "votes_cast": 2,
+        "votes_received": 1,
+        "votes_to_wolves": 0,
+        "votes_to_good": 2
+      },
+      "P4": {
+        "seat": 4,
+        "role": "seer",
+        "role_cn": "预言家",
+        "faction": "good",
+        "alive": false,
+        "death_reason": "exiled",
+        "speeches": 1,
+        "votes_cast": 1,
+        "votes_received": 4,
+        "votes_to_wolves": 1,
+        "votes_to_good": 0
+      },
+      "P5": {
+        "seat": 5,
+        "role": "werewolf",
+        "role_cn": "狼人",
+        "faction": "wolves",
+        "alive": true,
+        "death_reason": null,
+        "speeches": 2,
+        "votes_cast": 2,
+        "votes_received": 1,
+        "votes_to_wolves": 0,
+        "votes_to_good": 2
+      },
+      "P6": {
+        "seat": 6,
+        "role": "villager",
+        "role_cn": "平民",
+        "faction": "good",
+        "alive": false,
+        "death_reason": "exiled",
+        "speeches": 2,
+        "votes_cast": 2,
+        "votes_received": 4,
+        "votes_to_wolves": 1,
+        "votes_to_good": 1
+      }
+    }
+  },
+  "turning_points": [
+    {
+      "round": 1,
+      "description": "预言家被白天放逐，好人信息链受损。",
+      "impact": "high"
+    },
+    {
+      "round": 1,
+      "description": "白天放逐了好人 P4，狼人阵营获得节奏收益。",
+      "impact": "medium"
+    },
+    {
+      "round": 2,
+      "description": "白天放逐了好人 P6，狼人阵营获得节奏收益。",
+      "impact": "medium"
+    },
+    {
+      "round": null,
+      "description": "好人神职成功阻止至少一次狼刀，改变夜间减员节奏。",
+      "impact": "medium"
+    }
+  ],
+  "summary": "本局共进行 2 轮，狼人阵营获胜。死亡记录：P1(平民,werewolf_kill)、P4(预言家,exiled)、P6(平民,exiled)。好人投狼率：33.3%；狼人投好人率：100.0%。关键转折：预言家被白天放逐，好人信息链受损。；白天放逐了好人 P4，狼人阵营获得节奏收益。；白天放逐了好人 P6，狼人阵营获得节奏收益。"
+}

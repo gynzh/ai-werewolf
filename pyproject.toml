@@ -1,0 +1,14 @@
+[project]
+name = "ai-werewolf-mvp"
+version = "2.1.0"
+description = "Runnable v2.1 multi-agent AI Werewolf system with engine, evaluation, leaderboard, replay, and local web UI"
+requires-python = ">=3.10"
+authors = [{ name = "AI Werewolf Agent Team" }]
+readme = "README.md"
+
+[project.scripts]
+ai-werewolf = "ai_werewolf.cli:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

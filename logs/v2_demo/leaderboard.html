@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>AI Werewolf Leaderboard</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 32px; background: #f7f7f8; color: #202124; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 16px 0 24px; }
+.card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+.value { font-size: 28px; font-weight: 700; margin-top: 6px; }
+table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 24px; }
+th, td { border-bottom: 1px solid #eee; padding: 10px; vertical-align: top; text-align: left; }
+th { background: #eceff3; }
+</style>
+</head>
+<body>
+<h1>AI 狼人杀 v2.0 批量评测 Leaderboard</h1>
+<div class="grid">
+  <div class="card">总局数<div class="value">5</div></div>
+  <div class="card">好人胜率<div class="value">20.0%</div></div>
+  <div class="card">狼人胜率<div class="value">80.0%</div></div>
+  <div class="card">平均轮数<div class="value">3.6</div></div>
+  <div class="card">平均 fallback<div class="value">0.0</div></div>
+</div>
+<h2>按版本统计</h2>
+<table><thead><tr><th>版本</th><th>局数</th><th>好人胜率</th><th>狼人胜率</th><th>平均轮数</th><th>平均 fallback</th></tr></thead><tbody><tr><td>rule_based_v2</td><td>5</td><td>20.0%</td><td>80.0%</td><td>3.6</td><td>0.0</td></tr></tbody></table>
+<h2>角色存活统计</h2>
+<table><thead><tr><th>角色</th><th>出场数</th><th>存活数</th><th>存活率</th></tr></thead><tbody><tr><td>guard</td><td>5</td><td>3</td><td>60.0%</td></tr><tr><td>hunter</td><td>5</td><td>0</td><td>0.0%</td></tr><tr><td>seer</td><td>5</td><td>0</td><td>0.0%</td></tr><tr><td>villager</td><td>15</td><td>3</td><td>20.0%</td></tr><tr><td>werewolf</td><td>15</td><td>10</td><td>66.7%</td></tr><tr><td>witch</td><td>5</td><td>4</td><td>80.0%</td></tr></tbody></table>
+<h2>角色胜率</h2>
+<table><thead><tr><th>角色</th><th>出场数</th><th>获胜数</th><th>胜率</th></tr></thead><tbody><tr><td>guard</td><td>5</td><td>1</td><td>20.0%</td></tr><tr><td>hunter</td><td>5</td><td>1</td><td>20.0%</td></tr><tr><td>seer</td><td>5</td><td>1</td><td>20.0%</td></tr><tr><td>villager</td><td>15</td><td>3</td><td>20.0%</td></tr><tr><td>werewolf</td><td>15</td><td>12</td><td>80.0%</td></tr><tr><td>witch</td><td>5</td><td>1</td><td>20.0%</td></tr></tbody></table>
+<h2>对局摘要</h2>
+<table><thead><tr><th>Game ID</th><th>版本</th><th>胜者</th><th>轮数</th><th>摘要</th></tr></thead><tbody><tr><td>game_40cfe10d</td><td>rule_based_v2</td><td>wolves</td><td>3</td><td>本局共进行 3 轮，狼人阵营获胜。死亡记录：P2(平民,exiled)、P4(平民,werewolf_kill)、P5(女巫,werewolf_kill)、P7(猎人,exiled)、P8(平民,hunter_shot)、P9(预言家,exiled)。好人投狼率：28.6%；狼人投好人率：100.0%。关键转折：预言家被白天放逐，好人信息链受损。；白天放逐了好人 P9，狼人阵营获得节奏收益。；白天放逐了好人 P7，狼人阵营获得节奏收益。</td></tr><tr><td>game_2ce973c4</td><td>rule_based_v2</td><td>wolves</td><td>4</td><td>本局共进行 4 轮，狼人阵营获胜。死亡记录：P1(预言家,exiled)、P4(平民,werewolf_kill)、P5(猎人,exiled)、P6(平民,exiled)、P9(平民,hunter_shot)。好人投狼率：5.9%；狼人投好人率：100.0%。关键转折：预言家被白天放逐，好人信息链受损。；白天放逐了好人 P1，狼人阵营获得节奏收益。；白天放逐了好人 P5，狼人阵营获得节奏收益。</td></tr><tr><td>game_42d25d94</td><td>rule_based_v2</td><td>good</td><td>3</td><td>本局共进行 3 轮，好人阵营获胜。死亡记录：P2(预言家,exiled)、P4(猎人,werewolf_kill)、P7(守卫,werewolf_kill)、P8(狼人,exiled)、P9(狼人,exiled)、P10(狼人,hunter_shot)。好人投狼率：68.8%；狼人投好人率：100.0%。关键转折：预言家被白天放逐，好人信息链受损。；狼人因 exiled 出局，好人阵营获得关键优势。；狼人因 exiled 出局，好人阵营获得关键优势。</td></tr><tr><td>game_ee22eead</td><td>rule_based_v2</td><td>wolves</td><td>5</td><td>本局共进行 5 轮，狼人阵营获胜。死亡记录：P1(平民,werewolf_kill)、P3(平民,werewolf_kill)、P4(守卫,werewolf_kill)、P6(平民,witch_poison)、P7(预言家,exiled)、P8(狼人,hunter_shot)、P9(猎人,exiled)、P10(狼人,exiled)。好人投狼率：25.0%；狼人投好人率：100.0%。关键转折：预言家被白天放逐，好人信息链受损。；狼人因 hunter_shot 出局，好人阵营获得关键优势。；狼人因 exiled 出局，好人阵营获得关键优势。</td></tr><tr><td>game_2afde7b8</td><td>rule_based_v2</td><td>wolves</td><td>3</td><td>本局共进行 3 轮，狼人阵营获胜。死亡记录：P3(平民,exiled)、P5(平民,werewolf_kill)、P6(预言家,exiled)、P9(猎人,exiled)、P10(平民,hunter_shot)。好人投狼率：0.0%；狼人投好人率：100.0%。关键转折：预言家被白天放逐，好人信息链受损。；白天放逐了好人 P6，狼人阵营获得节奏收益。；白天放逐了好人 P9，狼人阵营获得节奏收益。</td></tr></tbody></table>
+</body>
+</html>
